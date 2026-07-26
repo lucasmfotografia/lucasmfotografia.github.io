@@ -1019,7 +1019,7 @@
   gap: 2rem;
 }
 .video-card { display: flex; flex-direction: column; }
-.video-card .instagram-media { margin: 0 auto !important; width: 100% !important; min-width: unset !important; }
+.video-card video { width: 100%; border-radius: 4px; background: #000; max-height: 480px; }
 .video-caption {
   font-family: 'DM Sans', sans-serif;
   font-size: 0.85rem; line-height: 1.6;
@@ -1110,9 +1110,6 @@ let currentIdx = 0;
 function openLB(id) {
   document.getElementById('lb-' + id).classList.add('active');
   document.body.style.overflow = 'hidden';
-  if (id === 'filmagem' && window.instgrm) {
-    instgrm.Embeds.process();
-  }
 }
 function closeLB() {
   document.querySelectorAll('.lb-overlay').forEach(el => el.classList.remove('active'));
@@ -1303,59 +1300,48 @@ outrosImgs.forEach((src, i) => {
     <div class="lb-grid-videos">
 
       <div class="video-card">
-        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/Dax1OOxAEhVPJOmSC--kvK1fm7HjfLCcA-YsiM0/" data-instgrm-version="14"></blockquote>
-        <p class="video-caption">[Legenda 1 — cole aqui o texto da publicação]</p>
+        <video controls preload="metadata" playsinline><source src="assets/videos/anthony-5-anos-teaser.mp4" type="video/mp4"></video>
+        <p class="video-caption">[Legenda — Anthony 5 anos]</p>
       </div>
 
       <div class="video-card">
-        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DDMrEnUxcFE/" data-instgrm-version="14"></blockquote>
-        <p class="video-caption">[Legenda 2 — cole aqui o texto da publicação]</p>
+        <video controls preload="metadata" playsinline><source src="assets/videos/helena-1-aninho.mp4" type="video/mp4"></video>
+        <p class="video-caption">[Legenda — Helena 1 aninho]</p>
       </div>
 
       <div class="video-card">
-        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DUnjSYZjgTK/" data-instgrm-version="14"></blockquote>
-        <p class="video-caption">[Legenda 3 — cole aqui o texto da publicação]</p>
+        <video controls preload="metadata" playsinline><source src="assets/videos/intensa-1-ano.mp4" type="video/mp4"></video>
+        <p class="video-caption">[Legenda — Intensa 1 ano]</p>
       </div>
 
       <div class="video-card">
-        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DZpf2odtpe3/" data-instgrm-version="14"></blockquote>
-        <p class="video-caption">[Legenda 4 — cole aqui o texto da publicação]</p>
+        <video controls preload="metadata" playsinline><source src="assets/videos/cha-da-helena.mp4" type="video/mp4"></video>
+        <p class="video-caption">[Legenda — Chá da Helena]</p>
       </div>
 
       <div class="video-card">
-        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DZdG1JtNFc8/" data-instgrm-version="14"></blockquote>
-        <p class="video-caption">[Legenda 5 — cole aqui o texto da publicação]</p>
+        <video controls preload="metadata" playsinline><source src="assets/videos/duda-procedimento.mp4" type="video/mp4"></video>
+        <p class="video-caption">[Legenda — Duda]</p>
       </div>
 
       <div class="video-card">
-        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DX-LIkOqHic/" data-instgrm-version="14"></blockquote>
-        <p class="video-caption">[Legenda 6 — cole aqui o texto da publicação]</p>
+        <video controls preload="metadata" playsinline><source src="assets/videos/pedro-e-davi.mp4" type="video/mp4"></video>
+        <p class="video-caption">[Legenda — Pedro e Davi]</p>
       </div>
 
       <div class="video-card">
-        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DPyjhdhjU9a/" data-instgrm-version="14"></blockquote>
-        <p class="video-caption">[Legenda 7 — cole aqui o texto da publicação]</p>
+        <video controls preload="metadata" playsinline><source src="assets/videos/rick-borgo.mp4" type="video/mp4"></video>
+        <p class="video-caption">[Legenda — Rick Borgo]</p>
       </div>
 
       <div class="video-card">
-        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DL2UzM-sE8j/" data-instgrm-version="14"></blockquote>
-        <p class="video-caption">[Legenda 8 — cole aqui o texto da publicação]</p>
-      </div>
-
-      <div class="video-card">
-        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DIG2FyPR7sF/" data-instgrm-version="14"></blockquote>
-        <p class="video-caption">[Legenda 9 — cole aqui o texto da publicação]</p>
-      </div>
-
-      <div class="video-card">
-        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DVwqEfshyh0/" data-instgrm-version="14"></blockquote>
-        <p class="video-caption">[Legenda 10 — cole aqui o texto da publicação]</p>
+        <video controls preload="metadata" playsinline><source src="assets/videos/thiago-balbino-vr.mp4" type="video/mp4"></video>
+        <p class="video-caption">[Legenda — Thiago Balbino]</p>
       </div>
 
     </div>
   </div>
 </div>
-<script async src="//www.instagram.com/embed.js"></script>
 
 </body>
 </html>
