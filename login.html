@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Área do Cliente | LucasM. Fotografia</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --purple: #5B2D8E;
+    --purple-light: #7B4DB0;
+    --purple-xlight: #9B6DD0;
+    --purple-pale: #EDE5F8;
+    --purple-dim: #3D1E60;
+    --bg: #FFFFFF;
+    --bg-2: #F7F4FC;
+    --text: #1A1020;
+    --muted: #6B5F80;
+    --border: rgba(91,45,142,0.15);
+    --border-strong: rgba(91,45,142,0.3);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: #0a0008;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .logo-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.1em;
+    color: #fff;
+    text-decoration: none;
+  }
+  .logo-text span { color: var(--purple-xlight); }
+  nav a.back-link {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  nav a.back-link:hover { color: #fff; }
+
+  /* LAYOUT */
+  .wrap {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 76px;
+  }
+
+  /* VISUAL SIDE (reaproveitando a linguagem do hero) */
+  .visual {
+    position: relative;
+    overflow: hidden;
+    background: #120820;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .visual-strip {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    gap: 4px;
+    animation: scrollStrip 22s linear infinite;
+  }
+  @keyframes scrollStrip { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+  .frame {
+    flex-shrink: 0;
+    height: 220px;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fr1 { background: #1a0d2e; } .fr2 { background: #0f1a2e; }
+  .fr3 { background: #1e0a1a; } .fr4 { background: #0a1e18; }
+  .fr5 { background: #1a1a0a; } .fr6 { background: #200a20; }
+  .frame span {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 0.6rem 1.2rem;
+    text-shadow: 0 0 20px rgba(155,109,208,0.6);
+  }
+  .visual-overlay-top {
+    position: absolute; top: 0; left: 0; right: 0; height: 140px;
+    background: linear-gradient(to bottom, #120820 0%, transparent 100%);
+    z-index: 2;
+  }
+  .visual-overlay-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 140px;
+    background: linear-gradient(to top, #120820 0%, transparent 100%);
+    z-index: 2;
+  }
+  .visual-badge {
+    position: relative; z-index: 3;
+    text-align: center;
+    padding: 2rem;
+  }
+  .visual-badge .lens {
+    width: 96px; height: 96px;
+    margin: 0 auto 1.5rem;
+    border: 2px solid rgba(255,255,255,0.25);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .visual-badge .lens::before {
+    content: '';
+    width: 56px; height: 56px;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+  }
+  .visual-badge p {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: rgba(255,255,255,0.75);
+    font-size: 1.15rem;
+    max-width: 320px;
+  }
+
+  /* FORM SIDE */
+  .form-side {
+    display: flex; align-items: center; justify-content: center;
+    padding: 3rem;
+  }
+  .form-box { width: 100%; max-width: 400px; }
+  .eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .eyebrow::before { content: ''; width: 32px; height: 2px; background: var(--purple); display: inline-block; }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.4rem, 5vw, 3rem);
+    line-height: 0.98;
+    letter-spacing: 0.02em;
+    margin-bottom: 1rem;
+  }
+  .form-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+  }
+
+  form { display: flex; flex-direction: column; gap: 1.1rem; }
+  label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  input[type="email"], input[type="password"] {
+    width: 100%;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.9rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 400;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  input:focus { outline: none; border-color: var(--purple); background: var(--bg); }
+
+  .btn-primary {
+    background: var(--purple);
+    color: #fff;
+    padding: 1rem 2.2rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: background 0.3s, transform 0.2s, opacity 0.2s;
+    margin-top: 0.5rem;
+  }
+  .btn-primary:hover { background: var(--purple-light); transform: translateY(-2px); }
+  .btn-primary:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+  .form-links {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 1.4rem;
+    font-size: 0.8rem;
+  }
+  .form-links a { color: var(--purple); text-decoration: none; }
+  .form-links a:hover { text-decoration: underline; }
+
+  .msg {
+    font-size: 0.82rem;
+    padding: 0.8rem 1rem;
+    border-left: 3px solid var(--purple);
+    background: var(--purple-pale);
+    color: var(--purple-dim);
+    display: none;
+    line-height: 1.5;
+  }
+  .msg.error { border-color: #b3413a; background: #fbeae8; color: #8a2f28; }
+  .msg.show { display: block; }
+
+  .contact-note {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .contact-note a { color: var(--purple); text-decoration: none; }
+
+  @media (max-width: 900px) {
+    .wrap { grid-template-columns: 1fr; }
+    .visual { height: 220px; }
+    nav { padding: 1rem 1.5rem; }
+    .form-side { padding: 2.5rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo-text">LUCASM<span>.</span></a>
+  <a href="index.html" class="back-link">Voltar ao site</a>
+</nav>
+
+<div class="wrap">
+  <div class="visual">
+    <div class="visual-overlay-top"></div>
+    <div class="visual-overlay-bottom"></div>
+    <div class="visual-strip">
+      <div class="frame fr1"><span>Eventos</span></div>
+      <div class="frame fr2"><span>Corporativo</span></div>
+      <div class="frame fr3"><span>Shows</span></div>
+      <div class="frame fr4"><span>Ensaios</span></div>
+      <div class="frame fr5"><span>Família</span></div>
+      <div class="frame fr6"><span>Momentos</span></div>
+      <div class="frame fr1"><span>Eventos</span></div>
+      <div class="frame fr2"><span>Corporativo</span></div>
+      <div class="frame fr3"><span>Shows</span></div>
+      <div class="frame fr4"><span>Ensaios</span></div>
+      <div class="frame fr5"><span>Família</span></div>
+      <div class="frame fr6"><span>Momentos</span></div>
+    </div>
+    <div class="visual-badge">
+      <div class="lens"></div>
+      <p>Cada sessão vira uma galeria só sua, guardada com carinho.</p>
+    </div>
+  </div>
+
+  <div class="form-side">
+    <div class="form-box">
+      <div class="eyebrow">Sua galeria</div>
+      <h1>Suas fotos<br>estão aqui.</h1>
+      <p class="form-desc" id="galleryLabel">Digite o código de acesso que recebeu para ver sua galeria.</p>
+
+      <div id="msgBox" class="msg"></div>
+
+      <form id="loginForm">
+        <div id="slugField" style="display:none;">
+          <label for="gallerySlug">Identificador da galeria (a parte final do link, ex: casamento-maria-9f2a)</label>
+          <input type="text" id="gallerySlug" name="gallerySlug" autocomplete="off" placeholder="Ex: casamento-maria-9f2a">
+        </div>
+        <div>
+          <label for="accessCode">Código de acesso</label>
+          <input type="text" id="accessCode" name="accessCode" autocomplete="off" required placeholder="Ex: MARIA2026" style="text-transform:uppercase;">
+        </div>
+        <button type="submit" class="btn-primary" id="submitBtn">Ver minha galeria</button>
+      </form>
+
+      <div class="contact-note">
+        Não recebeu seu código de acesso? Fale comigo pelo
+        <a href="https://wa.me/5524992938680" target="_blank" rel="noopener">WhatsApp</a>
+        e eu te envio.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { supabaseUrl, supabaseAnonKey } from './supabase-config.js';
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+  const form = document.getElementById('loginForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const msgBox = document.getElementById('msgBox');
+  const galleryLabel = document.getElementById('galleryLabel');
+  const slugField = document.getElementById('slugField');
+  const gallerySlugInput = document.getElementById('gallerySlug');
+
+  const params = new URLSearchParams(window.location.search);
+  const slugFromUrl = params.get('g');
+
+  function showMsg(text, isError) {
+    msgBox.textContent = text;
+    msgBox.className = 'msg show' + (isError ? ' error' : '');
+  }
+
+  if (!slugFromUrl) {
+    galleryLabel.textContent = 'Digite o nome da galeria e o código de acesso que o fotógrafo te enviou.';
+    slugField.style.display = 'block';
+    gallerySlugInput.required = true;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const slug = slugFromUrl || gallerySlugInput.value.trim().toLowerCase();
+    const code = document.getElementById('accessCode').value.trim();
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Entrando...';
+    msgBox.className = 'msg';
+
+    const { data, error } = await supabase.rpc('get_gallery_photos', {
+      p_slug: slug,
+      p_code: code
+    });
+
+    if (error) {
+      showMsg('Código incorreto, galeria não encontrada ou expirada. Confira com o fotógrafo.', true);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Ver minha galeria';
+      return;
+    }
+
+    const galleryName = data[0]?.gallery_name || 'Sua galeria';
+    const photos = data.map(row => ({
+      name: row.file_path.split('/').pop(),
+      url: `${supabaseUrl}/storage/v1/object/public/gallery-photos/${row.file_path}`
+    }));
+
+    sessionStorage.setItem('galleryData', JSON.stringify({ name: galleryName, photos }));
+    window.location.href = 'galeria-cliente.html';
+  });
+</script>
+
+</body>
+</html>

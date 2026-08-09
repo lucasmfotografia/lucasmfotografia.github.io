@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel | LucasM. Fotografia</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --purple: #5B2D8E;
+    --purple-light: #7B4DB0;
+    --purple-pale: #EDE5F8;
+    --purple-dim: #3D1E60;
+    --bg: #FFFFFF;
+    --bg-2: #F7F4FC;
+    --text: #1A1020;
+    --muted: #6B5F80;
+    --border: rgba(91,45,142,0.15);
+    --border-strong: rgba(91,45,142,0.3);
+    --red: #b3413a;
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: #0a0008; border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.1em; color: #fff; text-decoration: none; }
+  .logo-text span { color: #9B6DD0; }
+  #logoutBtn {
+    background: transparent; border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.85);
+    padding: 0.5rem 1.2rem; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; transition: border-color 0.3s, background 0.3s;
+  }
+  #logoutBtn:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
+
+  main { padding: 7.5rem 4rem 5rem; max-width: 1100px; margin: 0 auto; }
+
+  .eyebrow { font-size: 0.65rem; letter-spacing: 0.5em; text-transform: uppercase; color: var(--purple); margin-bottom: 0.6rem; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.2rem, 4.5vw, 3rem); letter-spacing: 0.02em; margin-bottom: 3rem; }
+  h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.03em; margin-bottom: 1.2rem; }
+
+  /* LOGIN GATE */
+  .login-gate { max-width: 400px; margin: 6rem auto; text-align: center; }
+  .login-gate form { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; text-align: left; }
+  .login-gate p.desc { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--muted); font-size: 1.05rem; }
+
+  label { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; display: block; }
+  input, select {
+    width: 100%; background: var(--bg-2); border: 1px solid var(--border); color: var(--text);
+    padding: 0.8rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 400;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--purple); background: var(--bg); }
+
+  .btn {
+    background: var(--purple); color: #fff; padding: 0.85rem 1.6rem; font-size: 0.75rem;
+    letter-spacing: 0.15em; text-transform: uppercase; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; transition: background 0.3s;
+  }
+  .btn:hover { background: var(--purple-light); }
+  .btn:disabled { opacity: 0.6; cursor: default; }
+  .btn-outline {
+    background: transparent; color: var(--purple); border: 1px solid var(--border-strong);
+    padding: 0.6rem 1.2rem; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+  .btn-outline:hover { background: var(--purple-pale); }
+
+  .msg { font-size: 0.82rem; padding: 0.8rem 1rem; border-left: 3px solid var(--purple); background: var(--purple-pale); color: var(--purple-dim); display: none; margin-top: 1rem; }
+  .msg.error { border-color: var(--red); background: #fbeae8; color: #8a2f28; }
+  .msg.show { display: block; }
+
+  /* CARDS */
+  .card {
+    border: 1px solid var(--border); padding: 2rem; margin-bottom: 3rem; background: var(--bg-2);
+  }
+  .form-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: end; }
+  .form-row > div { display: flex; flex-direction: column; }
+
+  .gallery-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .gallery-item { background: var(--bg); padding: 1.5rem; display: grid; grid-template-columns: 1fr auto auto auto; gap: 1.5rem; align-items: center; }
+  .gallery-item .name { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 0.03em; }
+  .gallery-item .meta { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+  .gallery-item .meta.expired { color: var(--red); }
+  .gallery-item input[type="file"] { font-size: 0.78rem; max-width: 220px; }
+  .upload-status { font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; }
+
+  .link-box { display: flex; gap: 0.5rem; align-items: center; }
+  .link-box input { font-size: 0.78rem; background: var(--bg); }
+
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    main { padding: 6.5rem 1.5rem 3rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .gallery-item { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo-text">LUCASM<span>.</span></a>
+  <button id="logoutBtn" style="display:none;">Sair</button>
+</nav>
+
+<main>
+
+  <div class="login-gate" id="loginGate">
+    <div class="eyebrow">Painel administrativo</div>
+    <h1 style="margin-bottom:0.5rem;">Acesso restrito</h1>
+    <p class="desc">Entre com sua conta de administrador para gerenciar as galerias.</p>
+    <div id="loginMsg" class="msg"></div>
+    <form id="loginForm">
+      <div>
+        <label for="adminEmail">E-mail</label>
+        <input type="email" id="adminEmail" required autocomplete="email">
+      </div>
+      <div>
+        <label for="adminPassword">Senha</label>
+        <input type="password" id="adminPassword" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn" id="loginBtn">Entrar</button>
+    </form>
+  </div>
+
+  <div id="panel" style="display:none;">
+    <div class="eyebrow">Painel administrativo</div>
+    <h1>Suas galerias</h1>
+
+    <div class="card">
+      <h2>Criar nova galeria</h2>
+      <div id="createMsg" class="msg"></div>
+      <form id="createForm">
+        <div class="form-row">
+          <div>
+            <label for="galName">Nome da galeria</label>
+            <input type="text" id="galName" placeholder="Ex: Casamento Maria e João" required>
+          </div>
+          <div>
+            <label for="galExpires">Expira em</label>
+            <input type="date" id="galExpires">
+          </div>
+          <div>
+            <label for="galCode">Código de acesso</label>
+            <input type="text" id="galCode" placeholder="ex: MARIA2026">
+          </div>
+          <button type="submit" class="btn">Criar</button>
+        </div>
+      </form>
+    </div>
+
+    <h2>Galerias existentes</h2>
+    <div class="gallery-list" id="galleryList"></div>
+  </div>
+
+</main>
+
+<script type="module">
+  import { supabaseUrl, supabaseAnonKey } from './supabase-config.js';
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  const BUCKET = 'gallery-photos';
+
+  const loginGate = document.getElementById('loginGate');
+  const panel = document.getElementById('panel');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loginMsg = document.getElementById('loginMsg');
+  const createMsg = document.getElementById('createMsg');
+  const galleryList = document.getElementById('galleryList');
+
+  function showMsg(el, text, isError) {
+    el.textContent = text;
+    el.className = 'msg show' + (isError ? ' error' : '');
+  }
+
+  function slugify(text) {
+    return text.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+      + '-' + Math.random().toString(36).slice(2, 6);
+  }
+
+  function randomCode() {
+    return Math.random().toString(36).slice(2, 8).toUpperCase();
+  }
+
+  async function checkSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      loginGate.style.display = 'block';
+      panel.style.display = 'none';
+      logoutBtn.style.display = 'none';
+      return;
+    }
+    const { data: adminRow } = await supabase.from('admins').select('id').eq('id', session.user.id).maybeSingle();
+    if (!adminRow) {
+      showMsg(loginMsg, 'Essa conta não tem permissão de administrador.', true);
+      await supabase.auth.signOut();
+      return;
+    }
+    loginGate.style.display = 'none';
+    panel.style.display = 'block';
+    logoutBtn.style.display = 'inline-block';
+    await loadGalleries();
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('adminEmail').value.trim();
+    const password = document.getElementById('adminPassword').value;
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true; btn.textContent = 'Entrando...';
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      showMsg(loginMsg, 'E-mail ou senha incorretos.', true);
+      btn.disabled = false; btn.textContent = 'Entrar';
+      return;
+    }
+    await checkSession();
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    checkSession();
+  });
+
+  document.getElementById('createForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('galName').value.trim();
+    const expiresInput = document.getElementById('galExpires').value;
+    let code = document.getElementById('galCode').value.trim();
+    if (!code) code = randomCode();
+    const slug = slugify(name);
+
+    const { error } = await supabase.from('galleries').insert({
+      name,
+      slug,
+      access_code: code,
+      expires_at: expiresInput || null
+    });
+
+    if (error) {
+      showMsg(createMsg, 'Não consegui criar a galeria: ' + error.message, true);
+      return;
+    }
+
+    showMsg(createMsg, `Galeria criada! Código: ${code}`, false);
+    document.getElementById('createForm').reset();
+    await loadGalleries();
+  });
+
+  async function loadGalleries() {
+    const { data: galleries, error } = await supabase
+      .from('galleries')
+      .select('id, slug, name, access_code, expires_at, created_at')
+      .order('created_at', { ascending: false });
+
+    galleryList.innerHTML = '';
+    if (error || !galleries || galleries.length === 0) {
+      galleryList.innerHTML = '<div class="gallery-item"><p style="color:var(--muted);">Nenhuma galeria criada ainda.</p></div>';
+      return;
+    }
+
+    galleries.forEach((g) => {
+      const isExpired = g.expires_at && new Date(g.expires_at) < new Date(new Date().toDateString());
+      const link = `${window.location.origin}${window.location.pathname.replace('admin.html', 'login.html')}?g=${g.slug}`;
+
+      const item = document.createElement('div');
+      item.className = 'gallery-item';
+      item.innerHTML = `
+        <div>
+          <div class="name">${g.name}</div>
+          <div class="meta ${isExpired ? 'expired' : ''}">
+            Código: ${g.access_code} ${g.expires_at ? '· Expira em ' + new Date(g.expires_at + 'T00:00:00').toLocaleDateString('pt-BR') : '· Sem expiração'}
+            ${isExpired ? ' · EXPIRADA' : ''}
+          </div>
+          <div class="link-box" style="margin-top:0.6rem;">
+            <input type="text" readonly value="${link}">
+            <button class="btn-outline copy-btn" type="button">Copiar link</button>
+          </div>
+        </div>
+        <div>
+          <label style="margin-bottom:0.3rem;">Adicionar fotos</label>
+          <input type="file" multiple accept="image/*" class="photo-input">
+          <div class="upload-status"></div>
+        </div>
+        <button class="btn-outline delete-btn" type="button">Excluir galeria</button>
+      `;
+
+      item.querySelector('.copy-btn').addEventListener('click', () => {
+        navigator.clipboard.writeText(link);
+        item.querySelector('.copy-btn').textContent = 'Copiado!';
+        setTimeout(() => { item.querySelector('.copy-btn').textContent = 'Copiar link'; }, 1500);
+      });
+
+      item.querySelector('.photo-input').addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files);
+        const statusEl = item.querySelector('.upload-status');
+        for (let i = 0; i < files.length; i++) {
+          statusEl.textContent = `Enviando ${i + 1} de ${files.length}...`;
+          const path = `${g.id}/${Date.now()}-${files[i].name}`;
+          const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, files[i]);
+          if (upErr) {
+            statusEl.textContent = `Erro ao enviar ${files[i].name}: ${upErr.message}`;
+            return;
+          }
+        }
+        statusEl.textContent = `${files.length} foto(s) enviada(s) com sucesso.`;
+      });
+
+      item.querySelector('.delete-btn').addEventListener('click', async () => {
+        if (!confirm(`Excluir a galeria "${g.name}"? As fotos enviadas continuam no Storage e podem ser apagadas manualmente lá.`)) return;
+        await supabase.from('galleries').delete().eq('id', g.id);
+        await loadGalleries();
+      });
+
+      galleryList.appendChild(item);
+    });
+  }
+
+  checkSession();
+</script>
+
+</body>
+</html>

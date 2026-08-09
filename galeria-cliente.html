@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Galeria | LucasM. Fotografia</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --purple: #5B2D8E;
+    --purple-light: #7B4DB0;
+    --purple-xlight: #9B6DD0;
+    --purple-pale: #EDE5F8;
+    --purple-dim: #3D1E60;
+    --bg: #FFFFFF;
+    --bg-2: #F7F4FC;
+    --text: #1A1020;
+    --muted: #6B5F80;
+    --border: rgba(91,45,142,0.15);
+    --border-strong: rgba(91,45,142,0.3);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: #0a0008;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .logo-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.1em;
+    color: #fff;
+    text-decoration: none;
+  }
+  .logo-text span { color: var(--purple-xlight); }
+  #logoutBtn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.85);
+    padding: 0.5rem 1.2rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  #logoutBtn:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
+
+  main { padding: 7.5rem 4rem 5rem; max-width: 1400px; margin: 0 auto; }
+
+  .gallery-header { margin-bottom: 3rem; }
+  .eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 0.6rem;
+  }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+    letter-spacing: 0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .session-meta {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1.1rem;
+  }
+
+  .state-box {
+    display: none;
+    text-align: center;
+    padding: 5rem 2rem;
+    color: var(--muted);
+  }
+  .state-box.show { display: block; }
+  .state-box p {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .toolbar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .toolbar button {
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.4rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: background 0.3s;
+  }
+  .toolbar button:hover { background: var(--purple-light); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 4px;
+  }
+  .photo-card {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--bg-2);
+    cursor: pointer;
+  }
+  .photo-card img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .photo-card:hover img { transform: scale(1.05); }
+  .photo-card .dl-btn {
+    position: absolute; bottom: 8px; right: 8px;
+    width: 34px; height: 34px;
+    background: rgba(10,0,8,0.65);
+    border: none;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.25s, background 0.25s;
+  }
+  .photo-card:hover .dl-btn { opacity: 1; }
+  .photo-card .dl-btn:hover { background: var(--purple); }
+  .photo-card .dl-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+  /* LIGHTBOX */
+  .lb-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,0,8,0.94);
+    z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .lb-overlay.active { display: flex; }
+  .lb-overlay img {
+    max-width: 90vw; max-height: 85vh;
+    object-fit: contain;
+  }
+  .lb-close, .lb-prev, .lb-next, .lb-download {
+    position: absolute;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.3s;
+  }
+  .lb-close:hover, .lb-prev:hover, .lb-next:hover, .lb-download:hover { background: var(--purple); }
+  .lb-close { top: 1.5rem; right: 1.5rem; width: 42px; height: 42px; font-size: 1.2rem; border-radius: 50%; }
+  .lb-download { top: 1.5rem; right: 5.5rem; width: 42px; height: 42px; border-radius: 50%; }
+  .lb-download svg { width: 18px; height: 18px; fill: #fff; }
+  .lb-prev, .lb-next { top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%; font-size: 1.4rem; }
+  .lb-prev { left: 1.5rem; } .lb-next { right: 1.5rem; }
+
+  @media (max-width: 900px) {
+    nav { padding: 1rem 1.5rem; }
+    main { padding: 6.5rem 1.5rem 3rem; }
+    .toolbar { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .lb-prev, .lb-next { width: 40px; height: 40px; }
+    .lb-download { right: 4.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo-text">LUCASM<span>.</span></a>
+  <button id="logoutBtn">Sair</button>
+</nav>
+
+<main>
+  <div class="gallery-header">
+    <div class="eyebrow">Área do cliente</div>
+    <h1 id="clientTitle">Sua galeria</h1>
+    <p class="session-meta" id="sessionMeta">Carregando informações da sessão...</p>
+  </div>
+
+  <div class="state-box" id="loadingState">
+    <p>Carregando...</p>
+  </div>
+
+  <div class="state-box" id="emptyState">
+    <p>Suas fotos ainda não foram enviadas para cá. Assim que a edição terminar, elas aparecem automaticamente nesta página.</p>
+  </div>
+
+  <div id="galleryContent" style="display:none;">
+    <div class="toolbar">
+      <span id="photoCount"></span>
+      <button id="downloadAllBtn">Baixar tudo</button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+
+<div class="lb-overlay" id="lightbox">
+  <button class="lb-close" id="lbClose">✕</button>
+  <button class="lb-download" id="lbDownload"><svg viewBox="0 0 24 24"><path d="M12 16l-6-6h4V3h4v7h4l-6 6zm-8 2h16v3H4v-3z"/></svg></button>
+  <button class="lb-prev" id="lbPrev">‹</button>
+  <img id="lbImg" src="" alt="">
+  <button class="lb-next" id="lbNext">›</button>
+</div>
+
+<script type="module">
+  import { supabaseUrl } from './supabase-config.js';
+
+  const clientTitle = document.getElementById('clientTitle');
+  const sessionMeta = document.getElementById('sessionMeta');
+  const loadingState = document.getElementById('loadingState');
+  const emptyState = document.getElementById('emptyState');
+  const galleryContent = document.getElementById('galleryContent');
+  const grid = document.getElementById('grid');
+  const photoCount = document.getElementById('photoCount');
+
+  let photos = [];
+  let currentIdx = 0;
+
+  const raw = sessionStorage.getItem('galleryData');
+  if (!raw) {
+    window.location.href = 'login.html';
+  } else {
+    const galleryData = JSON.parse(raw);
+    clientTitle.textContent = galleryData.name || 'Sua galeria';
+    sessionMeta.textContent = '';
+    photos = galleryData.photos || [];
+    render();
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem('galleryData');
+    window.location.href = 'login.html';
+  });
+
+  function render() {
+    loadingState.classList.remove('show');
+
+    if (photos.length === 0) {
+      emptyState.classList.add('show');
+      return;
+    }
+
+    galleryContent.style.display = 'block';
+    photoCount.textContent = `${photos.length} ${photos.length === 1 ? 'foto' : 'fotos'}`;
+    renderGrid();
+  }
+
+  function renderGrid() {
+    grid.innerHTML = '';
+    photos.forEach((photo, i) => {
+      const card = document.createElement('div');
+      card.className = 'photo-card';
+
+      const img = document.createElement('img');
+      img.src = photo.url;
+      img.loading = 'lazy';
+      img.alt = `Foto ${i + 1} da sua sessão`;
+      img.addEventListener('click', () => openLightbox(i));
+
+      const dlBtn = document.createElement('button');
+      dlBtn.className = 'dl-btn';
+      dlBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 16l-6-6h4V3h4v7h4l-6 6zm-8 2h16v3H4v-3z"/></svg>';
+      dlBtn.addEventListener('click', (e) => { e.stopPropagation(); downloadPhoto(photo); });
+
+      card.appendChild(img);
+      card.appendChild(dlBtn);
+      grid.appendChild(card);
+    });
+  }
+
+  async function downloadPhoto(photo) {
+    try {
+      const res = await fetch(photo.url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = photo.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+      window.open(photo.url, '_blank');
+    }
+  }
+
+  document.getElementById('downloadAllBtn').addEventListener('click', async () => {
+    for (const photo of photos) {
+      await downloadPhoto(photo);
+      await new Promise(r => setTimeout(r, 300)); // evita bloqueio de pop-up/downloads em massa
+    }
+  });
+
+  // LIGHTBOX
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+
+  function openLightbox(idx) {
+    currentIdx = idx;
+    lbImg.src = photos[idx].url;
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  function moveLightbox(dir) {
+    currentIdx = (currentIdx + dir + photos.length) % photos.length;
+    lbImg.src = photos[currentIdx].url;
+  }
+
+  document.getElementById('lbClose').addEventListener('click', closeLightbox);
+  document.getElementById('lbPrev').addEventListener('click', () => moveLightbox(-1));
+  document.getElementById('lbNext').addEventListener('click', () => moveLightbox(1));
+  document.getElementById('lbDownload').addEventListener('click', () => downloadPhoto(photos[currentIdx]));
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') moveLightbox(-1);
+    if (e.key === 'ArrowRight') moveLightbox(1);
+  });
+</script>
+
+</body>
+</html>
