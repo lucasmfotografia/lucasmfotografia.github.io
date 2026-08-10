@@ -324,6 +324,7 @@
 
     if (galleryData.coverPhotoUrl) {
       coverImg.src = galleryData.coverPhotoUrl;
+      coverImg.style.objectPosition = `center ${galleryData.coverPosition || 'center'}`;
       coverTitle.textContent = galleryData.name || 'Sua galeria';
       coverMessageText.textContent = galleryData.coverMessage || '';
       coverMessageText.style.display = galleryData.coverMessage ? 'block' : 'none';

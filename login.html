@@ -360,6 +360,7 @@
     const galleryId = data[0]?.gallery_id;
     const coverPhotoUrl = data[0]?.cover_photo_url || null;
     const coverMessage = data[0]?.cover_message || null;
+    const coverPosition = data[0]?.cover_position || 'center';
 
     let photos = [];
     try {
@@ -370,7 +371,7 @@
       photos = [];
     }
 
-    sessionStorage.setItem('galleryData', JSON.stringify({ name: galleryName, photos, coverPhotoUrl, coverMessage }));
+    sessionStorage.setItem('galleryData', JSON.stringify({ name: galleryName, photos, coverPhotoUrl, coverMessage, coverPosition }));
     window.location.href = 'galeria-cliente.html';
   });
 </script>

@@ -198,10 +198,10 @@
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(10,0,8,0.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:2rem;';
 
     const box = document.createElement('div');
-    box.style.cssText = 'background:#fff;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;padding:1.5rem;';
+    box.style.cssText = 'background:#fff;max-width:1100px;width:95%;max-height:90vh;overflow-y:auto;padding:2rem;';
     box.innerHTML = `
-      <h2 style="margin-bottom:1rem;">Escolha a foto de capa de "${g.name}"</h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;" id="coverPickerGrid"></div>
+      <h2 style="margin-bottom:1.2rem;">Escolha a foto de capa de "${g.name}"</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;" id="coverPickerGrid"></div>
       <button class="btn-outline" type="button" id="coverPickerClose" style="margin-top:1.5rem;">Cancelar</button>
     `;
     overlay.appendChild(box);
@@ -320,7 +320,7 @@
   async function loadGalleries() {
     const { data: galleries, error } = await supabase
       .from('galleries')
-      .select('id, slug, name, access_code, expires_at, created_at, cover_photo_url, cover_message')
+      .select('id, slug, name, access_code, expires_at, created_at, cover_photo_url, cover_message, cover_position')
       .order('created_at', { ascending: false });
 
     galleryList.innerHTML = '';
@@ -359,6 +359,14 @@
             <input type="text" class="cover-msg-input" value="${g.cover_message || ''}" placeholder="Ex: um dia lindo pra guardar" style="max-width:220px;">
             <button class="btn-outline save-cover-msg-btn" type="button">Salvar</button>
             <button class="btn-outline choose-cover-btn" type="button">${g.cover_photo_url ? 'Trocar capa' : 'Escolher capa'}</button>
+            ${g.cover_photo_url ? `
+            <label style="margin-bottom:0;">Área visível:</label>
+            <select class="cover-position-select" style="max-width:120px;">
+              <option value="top" ${g.cover_position === 'top' ? 'selected' : ''}>Topo</option>
+              <option value="center" ${!g.cover_position || g.cover_position === 'center' ? 'selected' : ''}>Centro</option>
+              <option value="bottom" ${g.cover_position === 'bottom' ? 'selected' : ''}>Base</option>
+            </select>
+            ` : ''}
             <span class="cover-status-msg" style="font-size:0.75rem;"></span>
             ${g.cover_photo_url ? `<img src="${g.cover_photo_url}" style="width:48px;height:48px;object-fit:cover;border:1px solid var(--border-strong);">` : ''}
           </div>
@@ -499,6 +507,13 @@
 
         openCoverPicker(g, photos);
       });
+
+      const positionSelect = item.querySelector('.cover-position-select');
+      if (positionSelect) {
+        positionSelect.addEventListener('change', async () => {
+          await supabase.from('galleries').update({ cover_position: positionSelect.value }).eq('id', g.id);
+        });
+      }
 
       item.querySelector('.photo-input').addEventListener('change', async (e) => {
         const files = Array.from(e.target.files);
