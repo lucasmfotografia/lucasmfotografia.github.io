@@ -333,7 +333,7 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const slug = slugFromUrl || gallerySlugInput.value.trim().toLowerCase();
-    const code = document.getElementById('accessCode').value.trim();
+    const code = document.getElementById('accessCode').value.trim().toUpperCase();
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Entrando...';
