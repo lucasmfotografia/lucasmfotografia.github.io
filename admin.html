@@ -475,7 +475,24 @@
       });
 
       item.querySelector('.delete-btn').addEventListener('click', async () => {
-        if (!confirm(`Excluir a galeria "${g.name}"? As fotos enviadas continuam no Storage e podem ser apagadas manualmente lá.`)) return;
+        if (!confirm(`Excluir a galeria "${g.name}"? As fotos dela também serão apagadas do armazenamento e isso não pode ser desfeito.`)) return;
+
+        const deleteBtn = item.querySelector('.delete-btn');
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'Excluindo...';
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          try {
+            await fetch(`${workerUrl}/gallery?gallery=${g.id}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${session.access_token}` }
+            });
+          } catch (err) {
+            // segue mesmo se falhar em apagar as fotos, pra não travar a exclusão da galeria
+          }
+        }
+
         await supabase.from('galleries').delete().eq('id', g.id);
         await loadGalleries();
       });
