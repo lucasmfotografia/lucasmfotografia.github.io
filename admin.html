@@ -81,7 +81,7 @@
   .card {
     border: 1px solid var(--border); padding: 2rem; margin-bottom: 3rem; background: var(--bg-2);
   }
-  .form-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: end; }
+  .form-row { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end; }
   .form-row > div { display: flex; flex-direction: column; }
 
   .gallery-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); }
@@ -151,6 +151,10 @@
             <input type="text" id="galName" placeholder="Ex: Casamento Maria e João" required>
           </div>
           <div>
+            <label for="galSlug">Link personalizado (opcional)</label>
+            <input type="text" id="galSlug" placeholder="ex: lucas-ensaio">
+          </div>
+          <div>
             <label for="galExpires">Expira em</label>
             <input type="date" id="galExpires">
           </div>
@@ -195,6 +199,13 @@
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '')
       + '-' + Math.random().toString(36).slice(2, 6);
+  }
+
+  function slugifyExact(text) {
+    return text.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
 
   function randomCode() {
@@ -248,7 +259,9 @@
     const expiresInput = document.getElementById('galExpires').value;
     let code = document.getElementById('galCode').value.trim();
     if (!code) code = randomCode();
-    const slug = slugify(name);
+
+    const customSlugInput = document.getElementById('galSlug').value.trim();
+    const slug = customSlugInput ? slugifyExact(customSlugInput) : slugify(name);
 
     const { error } = await supabase.from('galleries').insert({
       name,
@@ -258,11 +271,14 @@
     });
 
     if (error) {
-      showMsg(createMsg, 'Não consegui criar a galeria: ' + error.message, true);
+      const msg = error.message.includes('duplicate')
+        ? `Esse link já está sendo usado por outra galeria. Escolha outro em "Link personalizado".`
+        : 'Não consegui criar a galeria: ' + error.message;
+      showMsg(createMsg, msg, true);
       return;
     }
 
-    showMsg(createMsg, `Galeria criada! Código: ${code}`, false);
+    showMsg(createMsg, `Galeria criada! Código: ${code} — link: ...?g=${slug}`, false);
     document.getElementById('createForm').reset();
     await loadGalleries();
   });
