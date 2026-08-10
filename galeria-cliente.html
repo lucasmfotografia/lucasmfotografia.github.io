@@ -31,6 +31,56 @@
     min-height: 100vh;
   }
 
+  .cover-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .cover-hero img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .cover-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(10,0,8,0.35) 0%, rgba(10,0,8,0.55) 100%);
+  }
+  .cover-text {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 2rem;
+    color: #fff;
+  }
+  .cover-text h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    letter-spacing: 0.03em;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+  }
+  .cover-text p {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    margin-top: 1rem;
+    max-width: 500px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  .cover-text button {
+    margin-top: 2.5rem;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.7);
+    color: #fff;
+    padding: 0.9rem 2rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.3s, color 0.3s;
+  }
+  .cover-text button:hover { background: #fff; color: var(--purple-dim); }
+
   nav {
     position: fixed; top: 0; left: 0; right: 0;
     z-index: 100;
@@ -189,6 +239,9 @@
     .toolbar { flex-direction: column; align-items: flex-start; gap: 1rem; }
     .lb-prev, .lb-next { width: 40px; height: 40px; }
     .lb-download { right: 4.5rem; }
+    .grid { grid-template-columns: repeat(3, 1fr); gap: 2px; }
+    .photo-card .dl-btn { opacity: 1; width: 26px; height: 26px; bottom: 4px; right: 4px; }
+    .photo-card .dl-btn svg { width: 12px; height: 12px; }
   }
 </style>
 </head>
@@ -199,8 +252,18 @@
   <button id="logoutBtn">Sair</button>
 </nav>
 
+<div class="cover-hero" id="coverHero" style="display:none;">
+  <img id="coverImg" src="" alt="">
+  <div class="cover-overlay"></div>
+  <div class="cover-text">
+    <h1 id="coverTitle"></h1>
+    <p id="coverMessageText"></p>
+    <button id="coverScrollBtn">Ver fotos</button>
+  </div>
+</div>
+
 <main>
-  <div class="gallery-header">
+  <div class="gallery-header" id="galleryHeader">
     <div class="eyebrow">Área do cliente</div>
     <h1 id="clientTitle">Sua galeria</h1>
     <p class="session-meta" id="sessionMeta">Carregando informações da sessão...</p>
@@ -241,6 +304,11 @@
   const galleryContent = document.getElementById('galleryContent');
   const grid = document.getElementById('grid');
   const photoCount = document.getElementById('photoCount');
+  const coverHero = document.getElementById('coverHero');
+  const coverImg = document.getElementById('coverImg');
+  const coverTitle = document.getElementById('coverTitle');
+  const coverMessageText = document.getElementById('coverMessageText');
+  const galleryHeader = document.getElementById('galleryHeader');
 
   let photos = [];
   let currentIdx = 0;
@@ -253,6 +321,19 @@
     clientTitle.textContent = galleryData.name || 'Sua galeria';
     sessionMeta.textContent = '';
     photos = galleryData.photos || [];
+
+    if (galleryData.coverPhotoUrl) {
+      coverImg.src = galleryData.coverPhotoUrl;
+      coverTitle.textContent = galleryData.name || 'Sua galeria';
+      coverMessageText.textContent = galleryData.coverMessage || '';
+      coverMessageText.style.display = galleryData.coverMessage ? 'block' : 'none';
+      coverHero.style.display = 'block';
+      galleryHeader.style.display = 'none';
+      document.getElementById('coverScrollBtn').addEventListener('click', () => {
+        document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+
     render();
   }
 

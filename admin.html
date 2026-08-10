@@ -193,6 +193,40 @@
     el.className = 'msg show' + (isError ? ' error' : '');
   }
 
+  function openCoverPicker(g, photos) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(10,0,8,0.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:2rem;';
+
+    const box = document.createElement('div');
+    box.style.cssText = 'background:#fff;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;padding:1.5rem;';
+    box.innerHTML = `
+      <h2 style="margin-bottom:1rem;">Escolha a foto de capa de "${g.name}"</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;" id="coverPickerGrid"></div>
+      <button class="btn-outline" type="button" id="coverPickerClose" style="margin-top:1.5rem;">Cancelar</button>
+    `;
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    const grid = box.querySelector('#coverPickerGrid');
+    photos.forEach((photo) => {
+      const thumb = document.createElement('img');
+      thumb.src = photo.url;
+      thumb.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer;border:2px solid transparent;';
+      thumb.addEventListener('mouseenter', () => thumb.style.borderColor = 'var(--purple)');
+      thumb.addEventListener('mouseleave', () => thumb.style.borderColor = 'transparent');
+      thumb.addEventListener('click', async () => {
+        await supabase.from('galleries').update({ cover_photo_url: photo.url }).eq('id', g.id);
+        document.body.removeChild(overlay);
+        await loadGalleries();
+      });
+      grid.appendChild(thumb);
+    });
+
+    box.querySelector('#coverPickerClose').addEventListener('click', () => {
+      document.body.removeChild(overlay);
+    });
+  }
+
   function slugify(text) {
     return text.toLowerCase()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -286,7 +320,7 @@
   async function loadGalleries() {
     const { data: galleries, error } = await supabase
       .from('galleries')
-      .select('id, slug, name, access_code, expires_at, created_at')
+      .select('id, slug, name, access_code, expires_at, created_at, cover_photo_url, cover_message')
       .order('created_at', { ascending: false });
 
     galleryList.innerHTML = '';
@@ -319,6 +353,14 @@
             <input type="date" class="expiry-input" value="${g.expires_at || ''}" style="max-width:170px;">
             <button class="btn-outline save-expiry-btn" type="button">Salvar</button>
             <span class="expiry-msg" style="font-size:0.75rem;"></span>
+          </div>
+          <div class="cover-box" style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+            <label style="margin-bottom:0;">Mensagem na capa:</label>
+            <input type="text" class="cover-msg-input" value="${g.cover_message || ''}" placeholder="Ex: um dia lindo pra guardar" style="max-width:220px;">
+            <button class="btn-outline save-cover-msg-btn" type="button">Salvar</button>
+            <button class="btn-outline choose-cover-btn" type="button">${g.cover_photo_url ? 'Trocar capa' : 'Escolher capa'}</button>
+            <span class="cover-status-msg" style="font-size:0.75rem;"></span>
+            ${g.cover_photo_url ? `<img src="${g.cover_photo_url}" style="width:48px;height:48px;object-fit:cover;border:1px solid var(--border-strong);">` : ''}
           </div>
           <div class="link-box" style="margin-top:0.6rem;">
             <input type="text" readonly value="${link}">
@@ -416,6 +458,46 @@
         expiryMsg.style.color = 'var(--purple)';
         expiryMsg.textContent = 'Salvo!';
         setTimeout(() => { expiryMsg.textContent = ''; loadGalleries(); }, 1200);
+      });
+
+      item.querySelector('.save-cover-msg-btn').addEventListener('click', async () => {
+        const msgInput = item.querySelector('.cover-msg-input');
+        const statusEl = item.querySelector('.cover-status-msg');
+        const newMsg = msgInput.value.trim() || null;
+
+        const { error } = await supabase
+          .from('galleries')
+          .update({ cover_message: newMsg })
+          .eq('id', g.id);
+
+        statusEl.style.color = error ? 'var(--red)' : 'var(--purple)';
+        statusEl.textContent = error ? 'Erro ao salvar.' : 'Salvo!';
+        setTimeout(() => { statusEl.textContent = ''; }, 1500);
+      });
+
+      item.querySelector('.choose-cover-btn').addEventListener('click', async () => {
+        const chooseBtn = item.querySelector('.choose-cover-btn');
+        chooseBtn.disabled = true;
+        chooseBtn.textContent = 'Carregando...';
+
+        let photos = [];
+        try {
+          const res = await fetch(`${workerUrl}/list?gallery=${g.id}`);
+          const listData = await res.json();
+          photos = listData.photos || [];
+        } catch (err) {
+          photos = [];
+        }
+
+        chooseBtn.disabled = false;
+        chooseBtn.textContent = g.cover_photo_url ? 'Trocar capa' : 'Escolher capa';
+
+        if (photos.length === 0) {
+          alert('Envie fotos nessa galeria antes de escolher a capa.');
+          return;
+        }
+
+        openCoverPicker(g, photos);
       });
 
       item.querySelector('.photo-input').addEventListener('change', async (e) => {
