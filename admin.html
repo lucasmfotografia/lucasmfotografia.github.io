@@ -85,12 +85,19 @@
   .form-row > div { display: flex; flex-direction: column; }
 
   .gallery-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); }
-  .gallery-item { background: var(--bg); padding: 1.5rem; display: grid; grid-template-columns: 1fr auto auto auto; gap: 1.5rem; align-items: center; }
+  .gallery-item { background: var(--bg); padding: 1.5rem; display: grid; grid-template-columns: 1fr auto auto auto auto; gap: 1.5rem; align-items: center; }
   .gallery-item .name { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 0.03em; }
   .gallery-item .meta { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
   .gallery-item .meta.expired { color: var(--red); }
   .gallery-item input[type="file"] { font-size: 0.78rem; max-width: 220px; }
-  .upload-status { font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; }
+  .upload-status { font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; display: flex; align-items: center; gap: 0.6rem; }
+  .cancel-upload-btn {
+    display: none;
+    background: transparent; border: 1px solid var(--red); color: var(--red);
+    padding: 0.2rem 0.6rem; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+  .cancel-upload-btn:hover { background: #fbeae8; }
 
   .link-box { display: flex; gap: 0.5rem; align-items: center; }
   .link-box input { font-size: 0.78rem; background: var(--bg); }
@@ -289,13 +296,46 @@
             <button class="btn-outline copy-btn" type="button">Copiar link</button>
           </div>
         </div>
+        <button class="btn-outline view-btn" type="button">Visualizar</button>
         <div>
           <label style="margin-bottom:0.3rem;">Adicionar fotos</label>
           <input type="file" multiple accept="image/*" class="photo-input">
-          <div class="upload-status"></div>
+          <div class="upload-status">
+            <span class="upload-text"></span>
+            <button class="cancel-upload-btn" type="button">Cancelar</button>
+          </div>
         </div>
         <button class="btn-outline delete-btn" type="button">Excluir galeria</button>
       `;
+
+      item.querySelector('.view-btn').addEventListener('click', async () => {
+        const viewBtn = item.querySelector('.view-btn');
+        viewBtn.disabled = true;
+        viewBtn.textContent = 'Carregando...';
+
+        const { data: files, error: listError } = await supabase
+          .storage
+          .from(BUCKET)
+          .list(g.id, { sortBy: { column: 'name', order: 'asc' } });
+
+        viewBtn.disabled = false;
+        viewBtn.textContent = 'Visualizar';
+
+        if (listError || !files || files.length === 0) {
+          alert('Essa galeria ainda não tem fotos.');
+          return;
+        }
+
+        const photos = files
+          .filter(f => f.id)
+          .map(f => ({
+            name: f.name,
+            url: `${supabaseUrl}/storage/v1/object/public/${BUCKET}/${g.id}/${f.name}`
+          }));
+
+        sessionStorage.setItem('galleryData', JSON.stringify({ name: g.name, photos }));
+        window.open('galeria-cliente.html', '_blank');
+      });
 
       item.querySelector('.copy-btn').addEventListener('click', () => {
         navigator.clipboard.writeText(link);
@@ -305,17 +345,35 @@
 
       item.querySelector('.photo-input').addEventListener('change', async (e) => {
         const files = Array.from(e.target.files);
-        const statusEl = item.querySelector('.upload-status');
+        const statusText = item.querySelector('.upload-text');
+        const cancelBtn = item.querySelector('.cancel-upload-btn');
+        let cancelled = false;
+
+        cancelBtn.style.display = 'inline-block';
+        cancelBtn.onclick = () => {
+          cancelled = true;
+          statusText.textContent = 'Cancelando... (a foto atual termina de enviar)';
+        };
+
+        let sentCount = 0;
         for (let i = 0; i < files.length; i++) {
-          statusEl.textContent = `Enviando ${i + 1} de ${files.length}...`;
+          if (cancelled) break;
+          statusText.textContent = `Enviando ${i + 1} de ${files.length}...`;
           const path = `${g.id}/${Date.now()}-${files[i].name}`;
           const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, files[i]);
           if (upErr) {
-            statusEl.textContent = `Erro ao enviar ${files[i].name}: ${upErr.message}`;
+            statusText.textContent = `Erro ao enviar ${files[i].name}: ${upErr.message}`;
+            cancelBtn.style.display = 'none';
             return;
           }
+          sentCount++;
         }
-        statusEl.textContent = `${files.length} foto(s) enviada(s) com sucesso.`;
+
+        cancelBtn.style.display = 'none';
+        statusText.textContent = cancelled
+          ? `Cancelado. ${sentCount} de ${files.length} foto(s) enviada(s) antes de parar.`
+          : `${sentCount} foto(s) enviada(s) com sucesso.`;
+        e.target.value = '';
       });
 
       item.querySelector('.delete-btn').addEventListener('click', async () => {
