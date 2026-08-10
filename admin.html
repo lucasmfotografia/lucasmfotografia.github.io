@@ -288,8 +288,14 @@
         <div>
           <div class="name">${g.name}</div>
           <div class="meta ${isExpired ? 'expired' : ''}">
-            Código: ${g.access_code} ${g.expires_at ? '· Expira em ' + new Date(g.expires_at + 'T00:00:00').toLocaleDateString('pt-BR') : '· Sem expiração'}
+            ${g.expires_at ? 'Expira em ' + new Date(g.expires_at + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem expiração'}
             ${isExpired ? ' · EXPIRADA' : ''}
+          </div>
+          <div class="code-box" style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+            <label style="margin-bottom:0;">Código:</label>
+            <input type="text" class="code-input" value="${g.access_code}" style="max-width:160px; text-transform:uppercase;">
+            <button class="btn-outline save-code-btn" type="button">Salvar</button>
+            <span class="code-msg" style="font-size:0.75rem;"></span>
           </div>
           <div class="link-box" style="margin-top:0.6rem;">
             <input type="text" readonly value="${link}">
@@ -341,6 +347,34 @@
         navigator.clipboard.writeText(link);
         item.querySelector('.copy-btn').textContent = 'Copiado!';
         setTimeout(() => { item.querySelector('.copy-btn').textContent = 'Copiar link'; }, 1500);
+      });
+
+      item.querySelector('.save-code-btn').addEventListener('click', async () => {
+        const codeInput = item.querySelector('.code-input');
+        const codeMsg = item.querySelector('.code-msg');
+        const newCode = codeInput.value.trim().toUpperCase();
+
+        if (!newCode) {
+          codeMsg.style.color = 'var(--red)';
+          codeMsg.textContent = 'O código não pode ficar vazio.';
+          return;
+        }
+
+        const { error } = await supabase
+          .from('galleries')
+          .update({ access_code: newCode })
+          .eq('id', g.id);
+
+        if (error) {
+          codeMsg.style.color = 'var(--red)';
+          codeMsg.textContent = 'Erro ao salvar.';
+          return;
+        }
+
+        codeInput.value = newCode;
+        codeMsg.style.color = 'var(--purple)';
+        codeMsg.textContent = 'Salvo!';
+        setTimeout(() => { codeMsg.textContent = ''; }, 2000);
       });
 
       item.querySelector('.photo-input').addEventListener('change', async (e) => {
