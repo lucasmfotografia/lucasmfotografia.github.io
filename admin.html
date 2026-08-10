@@ -171,6 +171,7 @@
 
 <script type="module">
   import { supabaseUrl, supabaseAnonKey } from './supabase-config.js';
+  import { workerUrl } from './worker-config.js';
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -325,25 +326,22 @@
         viewBtn.disabled = true;
         viewBtn.textContent = 'Carregando...';
 
-        const { data: files, error: listError } = await supabase
-          .storage
-          .from(BUCKET)
-          .list(g.id, { sortBy: { column: 'name', order: 'asc' } });
+        let photos = [];
+        try {
+          const res = await fetch(`${workerUrl}/list?gallery=${g.id}`);
+          const listData = await res.json();
+          photos = listData.photos || [];
+        } catch (err) {
+          photos = [];
+        }
 
         viewBtn.disabled = false;
         viewBtn.textContent = 'Visualizar';
 
-        if (listError || !files || files.length === 0) {
+        if (photos.length === 0) {
           alert('Essa galeria ainda não tem fotos.');
           return;
         }
-
-        const photos = files
-          .filter(f => f.id)
-          .map(f => ({
-            name: f.name,
-            url: `${supabaseUrl}/storage/v1/object/public/${BUCKET}/${g.id}/${f.name}`
-          }));
 
         sessionStorage.setItem('galleryData', JSON.stringify({ name: g.name, photos }));
         window.open('galeria-cliente.html', '_blank');
@@ -416,14 +414,37 @@
           statusText.textContent = 'Cancelando... (a foto atual termina de enviar)';
         };
 
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          statusText.textContent = 'Sessão expirada. Atualize a página e entre de novo.';
+          cancelBtn.style.display = 'none';
+          return;
+        }
+
         let sentCount = 0;
         for (let i = 0; i < files.length; i++) {
           if (cancelled) break;
           statusText.textContent = `Enviando ${i + 1} de ${files.length}...`;
-          const path = `${g.id}/${Date.now()}-${files[i].name}`;
-          const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, files[i]);
-          if (upErr) {
-            statusText.textContent = `Erro ao enviar ${files[i].name}: ${upErr.message}`;
+
+          try {
+            const res = await fetch(`${workerUrl}/upload`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${session.access_token}`,
+                'Content-Type': files[i].type || 'application/octet-stream',
+                'x-gallery-id': g.id,
+                'x-file-name': files[i].name
+              },
+              body: files[i]
+            });
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              statusText.textContent = `Erro ao enviar ${files[i].name}: ${err.error || res.statusText}`;
+              cancelBtn.style.display = 'none';
+              return;
+            }
+          } catch (err) {
+            statusText.textContent = `Erro de conexão ao enviar ${files[i].name}.`;
             cancelBtn.style.display = 'none';
             return;
           }

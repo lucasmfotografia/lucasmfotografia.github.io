@@ -305,6 +305,7 @@
 
 <script type="module">
   import { supabaseUrl, supabaseAnonKey } from './supabase-config.js';
+  import { workerUrl } from './worker-config.js';
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -352,10 +353,16 @@
     }
 
     const galleryName = data[0]?.gallery_name || 'Sua galeria';
-    const photos = data.map(row => ({
-      name: row.file_path.split('/').pop(),
-      url: `${supabaseUrl}/storage/v1/object/public/gallery-photos/${row.file_path}`
-    }));
+    const galleryId = data[0]?.gallery_id;
+
+    let photos = [];
+    try {
+      const res = await fetch(`${workerUrl}/list?gallery=${galleryId}`);
+      const listData = await res.json();
+      photos = listData.photos || [];
+    } catch (err) {
+      photos = [];
+    }
 
     sessionStorage.setItem('galleryData', JSON.stringify({ name: galleryName, photos }));
     window.location.href = 'galeria-cliente.html';
