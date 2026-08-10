@@ -291,11 +291,17 @@
             ${g.expires_at ? 'Expira em ' + new Date(g.expires_at + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem expiração'}
             ${isExpired ? ' · EXPIRADA' : ''}
           </div>
-          <div class="code-box" style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+          <div class="code-box" style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
             <label style="margin-bottom:0;">Código:</label>
             <input type="text" class="code-input" value="${g.access_code}" style="max-width:160px; text-transform:uppercase;">
             <button class="btn-outline save-code-btn" type="button">Salvar</button>
             <span class="code-msg" style="font-size:0.75rem;"></span>
+          </div>
+          <div class="expiry-box" style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+            <label style="margin-bottom:0;">Expira em:</label>
+            <input type="date" class="expiry-input" value="${g.expires_at || ''}" style="max-width:170px;">
+            <button class="btn-outline save-expiry-btn" type="button">Salvar</button>
+            <span class="expiry-msg" style="font-size:0.75rem;"></span>
           </div>
           <div class="link-box" style="margin-top:0.6rem;">
             <input type="text" readonly value="${link}">
@@ -375,6 +381,27 @@
         codeMsg.style.color = 'var(--purple)';
         codeMsg.textContent = 'Salvo!';
         setTimeout(() => { codeMsg.textContent = ''; }, 2000);
+      });
+
+      item.querySelector('.save-expiry-btn').addEventListener('click', async () => {
+        const expiryInput = item.querySelector('.expiry-input');
+        const expiryMsg = item.querySelector('.expiry-msg');
+        const newExpiry = expiryInput.value || null;
+
+        const { error } = await supabase
+          .from('galleries')
+          .update({ expires_at: newExpiry })
+          .eq('id', g.id);
+
+        if (error) {
+          expiryMsg.style.color = 'var(--red)';
+          expiryMsg.textContent = 'Erro ao salvar.';
+          return;
+        }
+
+        expiryMsg.style.color = 'var(--purple)';
+        expiryMsg.textContent = 'Salvo!';
+        setTimeout(() => { expiryMsg.textContent = ''; loadGalleries(); }, 1200);
       });
 
       item.querySelector('.photo-input').addEventListener('change', async (e) => {
