@@ -85,29 +85,64 @@
   .form-row { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end; }
   .form-row > div { display: flex; flex-direction: column; }
 
-  .gallery-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); }
-  .gallery-item { background: var(--bg); padding: 1.5rem; display: grid; grid-template-columns: 1fr auto auto auto auto; gap: 1.5rem; align-items: center; }
-  .gallery-item .name { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 0.03em; }
-  .gallery-item .meta { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
-  .gallery-item .meta.expired { color: var(--red); }
-  .gallery-item input[type="file"] { font-size: 0.78rem; max-width: 220px; }
-  .upload-status { font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; display: flex; align-items: center; gap: 0.6rem; }
+  .gallery-list { display: flex; flex-direction: column; gap: 1.25rem; }
+  .gallery-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 1.75rem;
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 1.75rem;
+  }
+  .gi-cover {
+    width: 130px; height: 130px;
+    background: var(--purple-pale);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .gi-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .gi-cover-placeholder { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--purple); text-align: center; padding: 0 0.5rem; }
+
+  .gi-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; }
+  .gallery-item .name { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.03em; display: flex; align-items: center; gap: 0.6rem; }
+  .badge-expired { font-family: 'DM Sans', sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; color: var(--red); border: 1px solid var(--red); padding: 0.15rem 0.5rem; }
+  .gallery-item .meta { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+
+  .gi-fields { display: grid; grid-template-columns: 1fr 1fr 1.4fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+  .gi-field { display: flex; flex-direction: column; gap: 0.4rem; }
+  .gi-field label { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .gi-field-row { display: flex; gap: 0.4rem; }
+  .gi-field-row input, .gi-field-row select { flex: 1; min-width: 0; }
+  .gi-status { font-size: 0.72rem; min-height: 1em; color: var(--purple); }
+
+  .gi-link { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+  .gi-link input { flex: 1; font-size: 0.78rem; background: var(--bg-2); }
+
+  .gi-actions {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+    padding-top: 1.25rem; border-top: 1px solid var(--border);
+  }
+  .gi-upload { display: flex; flex-direction: column; gap: 0.4rem; }
+  .gi-upload .gi-field-row { align-items: center; }
+  .gi-upload input[type="file"] { font-size: 0.76rem; max-width: 230px; }
+  .btn-outline.danger { color: var(--red); border-color: var(--red); }
+  .btn-outline.danger:hover { background: #fbeae8; }
   .cancel-upload-btn {
     display: none;
     background: transparent; border: 1px solid var(--red); color: var(--red);
-    padding: 0.2rem 0.6rem; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.4rem 0.8rem; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
     cursor: pointer; font-family: 'DM Sans', sans-serif;
   }
   .cancel-upload-btn:hover { background: #fbeae8; }
-
-  .link-box { display: flex; gap: 0.5rem; align-items: center; }
-  .link-box input { font-size: 0.78rem; background: var(--bg); }
 
   @media (max-width: 900px) {
     nav { padding: 1rem 1.5rem; }
     main { padding: 6.5rem 1.5rem 3rem; }
     .form-row { grid-template-columns: 1fr; }
     .gallery-item { grid-template-columns: 1fr; }
+    .gi-cover { width: 100%; height: 160px; }
+    .gi-fields { grid-template-columns: 1fr 1fr; }
+    .gi-actions { flex-direction: column; align-items: stretch; }
     .logo-text { font-size: 0.8rem; }
   }
 </style>
@@ -338,55 +373,78 @@
       const item = document.createElement('div');
       item.className = 'gallery-item';
       item.innerHTML = `
+        <div class="gi-cover">
+          ${g.cover_photo_url ? `<img src="${g.cover_photo_url}" alt="">` : `<span class="gi-cover-placeholder">Sem capa definida</span>`}
+        </div>
         <div>
-          <div class="name">${g.name}</div>
-          <div class="meta ${isExpired ? 'expired' : ''}">
-            ${g.expires_at ? 'Expira em ' + new Date(g.expires_at + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem expiração'}
-            ${isExpired ? ' · EXPIRADA' : ''}
+          <div class="gi-top">
+            <div>
+              <div class="name">${g.name} ${isExpired ? '<span class="badge-expired">EXPIRADA</span>' : ''}</div>
+              <div class="meta">${g.expires_at ? 'Expira em ' + new Date(g.expires_at + 'T00:00:00').toLocaleDateString('pt-BR') : 'Sem data de expiração'}</div>
+            </div>
+            <button class="btn-outline view-btn" type="button">Visualizar</button>
           </div>
-          <div class="code-box" style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-            <label style="margin-bottom:0;">Código:</label>
-            <input type="text" class="code-input" value="${g.access_code}" style="max-width:160px; text-transform:uppercase;">
-            <button class="btn-outline save-code-btn" type="button">Salvar</button>
-            <span class="code-msg" style="font-size:0.75rem;"></span>
+
+          <div class="gi-fields">
+            <div class="gi-field">
+              <label>Código de acesso</label>
+              <div class="gi-field-row">
+                <input type="text" class="code-input" value="${g.access_code}" style="text-transform:uppercase;">
+                <button class="btn-outline save-code-btn" type="button">Salvar</button>
+              </div>
+              <span class="code-msg gi-status"></span>
+            </div>
+
+            <div class="gi-field">
+              <label>Expira em</label>
+              <div class="gi-field-row">
+                <input type="date" class="expiry-input" value="${g.expires_at || ''}">
+                <button class="btn-outline save-expiry-btn" type="button">Salvar</button>
+              </div>
+              <span class="expiry-msg gi-status"></span>
+            </div>
+
+            <div class="gi-field">
+              <label>Mensagem na capa</label>
+              <div class="gi-field-row">
+                <input type="text" class="cover-msg-input" value="${g.cover_message || ''}" placeholder="Ex: um dia lindo pra guardar">
+                <button class="btn-outline save-cover-msg-btn" type="button">Salvar</button>
+              </div>
+              <span class="cover-status-msg gi-status"></span>
+            </div>
+
+            <div class="gi-field">
+              <label>Foto de capa</label>
+              <div class="gi-field-row">
+                <button class="btn-outline choose-cover-btn" type="button" style="width:100%;">${g.cover_photo_url ? 'Trocar capa' : 'Escolher capa'}</button>
+                ${g.cover_photo_url ? `
+                <select class="cover-position-select">
+                  <option value="top" ${g.cover_position === 'top' ? 'selected' : ''}>Topo</option>
+                  <option value="center" ${!g.cover_position || g.cover_position === 'center' ? 'selected' : ''}>Centro</option>
+                  <option value="bottom" ${g.cover_position === 'bottom' ? 'selected' : ''}>Base</option>
+                </select>
+                ` : ''}
+              </div>
+            </div>
           </div>
-          <div class="expiry-box" style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-            <label style="margin-bottom:0;">Expira em:</label>
-            <input type="date" class="expiry-input" value="${g.expires_at || ''}" style="max-width:170px;">
-            <button class="btn-outline save-expiry-btn" type="button">Salvar</button>
-            <span class="expiry-msg" style="font-size:0.75rem;"></span>
-          </div>
-          <div class="cover-box" style="margin-top:0.5rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-            <label style="margin-bottom:0;">Mensagem na capa:</label>
-            <input type="text" class="cover-msg-input" value="${g.cover_message || ''}" placeholder="Ex: um dia lindo pra guardar" style="max-width:220px;">
-            <button class="btn-outline save-cover-msg-btn" type="button">Salvar</button>
-            <button class="btn-outline choose-cover-btn" type="button">${g.cover_photo_url ? 'Trocar capa' : 'Escolher capa'}</button>
-            ${g.cover_photo_url ? `
-            <label style="margin-bottom:0;">Área visível:</label>
-            <select class="cover-position-select" style="max-width:120px;">
-              <option value="top" ${g.cover_position === 'top' ? 'selected' : ''}>Topo</option>
-              <option value="center" ${!g.cover_position || g.cover_position === 'center' ? 'selected' : ''}>Centro</option>
-              <option value="bottom" ${g.cover_position === 'bottom' ? 'selected' : ''}>Base</option>
-            </select>
-            ` : ''}
-            <span class="cover-status-msg" style="font-size:0.75rem;"></span>
-            ${g.cover_photo_url ? `<img src="${g.cover_photo_url}" style="width:48px;height:48px;object-fit:cover;border:1px solid var(--border-strong);">` : ''}
-          </div>
-          <div class="link-box" style="margin-top:0.6rem;">
+
+          <div class="gi-link">
             <input type="text" readonly value="${link}">
             <button class="btn-outline copy-btn" type="button">Copiar link</button>
           </div>
-        </div>
-        <button class="btn-outline view-btn" type="button">Visualizar</button>
-        <div>
-          <label style="margin-bottom:0.3rem;">Adicionar fotos</label>
-          <input type="file" multiple accept="image/*" class="photo-input">
-          <div class="upload-status">
-            <span class="upload-text"></span>
-            <button class="cancel-upload-btn" type="button">Cancelar</button>
+
+          <div class="gi-actions">
+            <div class="gi-upload">
+              <label style="font-size:0.66rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">Adicionar fotos</label>
+              <div class="gi-field-row">
+                <input type="file" multiple accept="image/*" class="photo-input">
+                <button class="cancel-upload-btn" type="button">Cancelar</button>
+              </div>
+              <span class="upload-text gi-status"></span>
+            </div>
+            <button class="btn-outline danger delete-btn" type="button">Excluir galeria</button>
           </div>
         </div>
-        <button class="btn-outline delete-btn" type="button">Excluir galeria</button>
       `;
 
       item.querySelector('.view-btn').addEventListener('click', async () => {
