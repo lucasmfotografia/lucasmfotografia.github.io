@@ -386,7 +386,7 @@
 
   async function downloadPhoto(photo) {
     try {
-      const res = await fetch(photo.url);
+      const res = await fetch(`${photo.url}?cb=${Date.now()}`);
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -411,7 +411,7 @@
 
       for (let i = 0; i < photos.length; i++) {
         statusEl.textContent = `Preparando ${i + 1} de ${photos.length}...`;
-        const res = await fetch(photos[i].url);
+        const res = await fetch(`${photos[i].url}?cb=${Date.now()}`);
         const blob = await res.blob();
         zip.file(photos[i].name, blob);
       }
