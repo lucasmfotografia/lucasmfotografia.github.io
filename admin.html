@@ -108,11 +108,14 @@
   .badge-expired { font-family: 'DM Sans', sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; color: var(--red); border: 1px solid var(--red); padding: 0.15rem 0.5rem; }
   .gallery-item .meta { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
 
-  .gi-fields { display: grid; grid-template-columns: 1fr 1fr 1.4fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+  .gi-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem 2rem; margin-bottom: 1.25rem; }
   .gi-field { display: flex; flex-direction: column; gap: 0.4rem; }
+  .gi-field-wide { grid-column: 1 / -1; }
   .gi-field label { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-  .gi-field-row { display: flex; gap: 0.4rem; }
+  .gi-field-row { display: flex; gap: 0.5rem; }
   .gi-field-row input, .gi-field-row select { flex: 1; min-width: 0; }
+  .gi-field-row .btn-outline { flex-shrink: 0; }
+  .cover-position-select { flex: 0 0 120px; }
   .gi-status { font-size: 0.72rem; min-height: 1em; color: var(--purple); }
 
   .gi-link { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
@@ -141,7 +144,7 @@
     .form-row { grid-template-columns: 1fr; }
     .gallery-item { grid-template-columns: 1fr; }
     .gi-cover { width: 100%; height: 160px; }
-    .gi-fields { grid-template-columns: 1fr 1fr; }
+    .gi-fields { grid-template-columns: 1fr; }
     .gi-actions { flex-direction: column; align-items: stretch; }
     .logo-text { font-size: 0.8rem; }
   }
@@ -404,7 +407,7 @@
               <span class="expiry-msg gi-status"></span>
             </div>
 
-            <div class="gi-field">
+            <div class="gi-field gi-field-wide">
               <label>Mensagem na capa</label>
               <div class="gi-field-row">
                 <input type="text" class="cover-msg-input" value="${g.cover_message || ''}" placeholder="Ex: um dia lindo pra guardar">
@@ -413,10 +416,10 @@
               <span class="cover-status-msg gi-status"></span>
             </div>
 
-            <div class="gi-field">
+            <div class="gi-field gi-field-wide">
               <label>Foto de capa</label>
               <div class="gi-field-row">
-                <button class="btn-outline choose-cover-btn" type="button" style="width:100%;">${g.cover_photo_url ? 'Trocar capa' : 'Escolher capa'}</button>
+                <button class="btn-outline choose-cover-btn" type="button">${g.cover_photo_url ? 'Trocar capa' : 'Escolher capa'}</button>
                 ${g.cover_photo_url ? `
                 <select class="cover-position-select">
                   <option value="top" ${g.cover_position === 'top' ? 'selected' : ''}>Topo</option>
