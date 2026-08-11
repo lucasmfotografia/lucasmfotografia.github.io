@@ -7,6 +7,7 @@
 <title>Minha Galeria | LucasM. Fotografia</title>
 <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -92,10 +93,11 @@
   }
   .logo-text {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.6rem;
-    letter-spacing: 0.1em;
+    font-size: 1.1rem;
+    letter-spacing: 0.06em;
     color: #fff;
     text-decoration: none;
+    white-space: nowrap;
   }
   .logo-text span { color: var(--purple-xlight); }
   #logoutBtn {
@@ -243,13 +245,14 @@
     .grid { grid-template-columns: repeat(3, 1fr); gap: 2px; }
     .photo-card .dl-btn { opacity: 1; width: 26px; height: 26px; bottom: 4px; right: 4px; }
     .photo-card .dl-btn svg { width: 12px; height: 12px; }
+    .logo-text { font-size: 0.8rem; }
   }
 </style>
 </head>
 <body>
 
 <nav>
-  <a href="index.html" class="logo-text">LUCASM<span>.</span></a>
+  <a href="index.html" class="logo-text">LUCASM<span>.</span> FOTOGRAFIA &amp; AUDIOVISUAL</a>
   <button id="logoutBtn">Sair</button>
 </nav>
 
@@ -281,7 +284,8 @@
   <div id="galleryContent" style="display:none;">
     <div class="toolbar">
       <span id="photoCount"></span>
-      <button id="downloadAllBtn">Baixar tudo</button>
+      <button id="downloadAllBtn">Baixar tudo (.zip)</button>
+      <span id="zipStatus" style="font-size:0.78rem;color:var(--muted);"></span>
     </div>
     <div class="grid" id="grid"></div>
   </div>
@@ -398,9 +402,41 @@
   }
 
   document.getElementById('downloadAllBtn').addEventListener('click', async () => {
-    for (const photo of photos) {
-      await downloadPhoto(photo);
-      await new Promise(r => setTimeout(r, 300)); // evita bloqueio de pop-up/downloads em massa
+    const btn = document.getElementById('downloadAllBtn');
+    const statusEl = document.getElementById('zipStatus');
+    btn.disabled = true;
+
+    try {
+      const zip = new JSZip();
+
+      for (let i = 0; i < photos.length; i++) {
+        statusEl.textContent = `Preparando ${i + 1} de ${photos.length}...`;
+        const res = await fetch(photos[i].url);
+        const blob = await res.blob();
+        zip.file(photos[i].name, blob);
+      }
+
+      statusEl.textContent = 'Compactando...';
+      const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+        statusEl.textContent = `Compactando... ${Math.round(metadata.percent)}%`;
+      });
+
+      const zipUrl = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = zipUrl;
+      const galleryTitle = document.getElementById('clientTitle').textContent || 'galeria';
+      a.download = `${galleryTitle.replace(/[^a-z0-9]+/gi, '-')}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(zipUrl);
+
+      statusEl.textContent = 'Download iniciado!';
+    } catch (err) {
+      statusEl.textContent = 'Não consegui gerar o zip. Tente baixar as fotos uma a uma.';
+    } finally {
+      btn.disabled = false;
+      setTimeout(() => { statusEl.textContent = ''; }, 4000);
     }
   });
 
