@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudioFlow — o sistema por trás do estúdio | LucasM. Fotografia</title>
+<meta name="description" content="StudioFlow: o programa de gestão criado por um fotógrafo pra fotógrafos. Pipeline, orçamentos em PDF, agenda, entregas automáticas e financeiro — pagamento único, sem mensalidade.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#0A0008;
+  --void-2:#150A1F;
+  --surface:#1B1026;
+  --line:#2E2038;
+  --line-soft:#241830;
+  --paper:#FFFFFF;
+  --paper-tint:#FAF8FC;
+  --purple:#5B2D8E;
+  --purple-bright:#8B5CC7;
+  --purple-soft:rgba(91,45,142,.12);
+  --ink:#F4F0F8;
+  --ink-dim:#C9C0D6;
+  --muted:#A098AE;
+  --muted-on-paper:#6E6478;
+  --faint:#6E6480;
+  --sf-blue:#2E86DE;
+  --sf-blue-dim:#1B5FA8;
+  --sf-dark:#0C0A16;
+  --sage:#6FAE8C;
+  --font-display:'Archivo Black', sans-serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--void);
+  color:var(--ink);
+  font-family:var(--font-body);
+  line-height:1.6;
+  overflow-x:hidden;
+}
+img{max-width:100%; display:block;}
+a{color:inherit; text-decoration:none;}
+::selection{background:var(--purple); color:#fff;}
+
+.wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+section{position:relative;}
+
+/* ---------------- NAV (copiado exatamente do index.html, sem alterações) ---------------- */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 1rem 4rem;
+  display: flex; justify-content: space-between; align-items: center;
+  background: #0a0008;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.logo-img { height: 44px; width: auto; display: block; }
+.logo-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.1em;
+  color: #F4F0F8;
+  text-decoration: none;
+}
+.logo-text span { color: var(--purple); }
+nav ul { list-style: none; display: flex; gap: 2.5rem; }
+nav ul a {
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition: color 0.3s;
+  font-family: var(--font-body);
+}
+nav ul a:hover { color: #fff; }
+nav ul a.current { color: var(--purple-xlight, #9B6DD0); }
+.nav-cta {
+  background: #fff;
+  color: var(--purple) !important;
+  padding: 0.55rem 1.4rem;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.15em !important;
+  transition: background 0.3s !important;
+  font-weight: 500 !important;
+}
+.nav-cta:hover { background: #EDE5F8 !important; color: #3D1E60 !important; }
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 32px; height: 32px;
+  background: none; border: none; cursor: pointer;
+  padding: 0; z-index: 101; position: relative;
+}
+.nav-toggle span {
+  display: block;
+  width: 100%; height: 2px;
+  background: #fff;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.nav-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 98;
+}
+.nav-overlay.open { display: block; }
+
+body{padding-top:80px;} /* compensa o nav fixo, igual ao index.html */
+
+.floating-whatsapp {
+  position: fixed;
+  bottom: 1.5rem; right: 1.5rem;
+  z-index: 500;
+  background: #25D366;
+  color: #fff;
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
+  pointer-events: none;
+}
+.floating-whatsapp.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.floating-whatsapp:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+.floating-whatsapp svg { width: 28px; height: 28px; }
+.fw-label {
+  position: absolute; right: 68px;
+  background: #1a1020; color: #fff;
+  padding: 0.5rem 0.9rem; border-radius: 4px;
+  font-size: 0.75rem; letter-spacing: 0.03em; white-space: nowrap;
+  opacity: 0; transform: translateX(8px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+.floating-whatsapp:hover .fw-label { opacity: 1; transform: translateX(0); }
+@media (max-width: 900px) {
+  .floating-whatsapp { width: 52px; height: 52px; bottom: 1.2rem; right: 1.2rem; }
+  .fw-label { display: none; }
+}
+
+@media (max-width: 900px) {
+  nav { padding: 1.2rem 1.5rem; }
+  .nav-toggle { display: flex; }
+  nav ul {
+    position: fixed;
+    top: 0; right: -100%;
+    width: min(78vw, 320px);
+    height: 100vh;
+    background: #0a0008;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 6rem 2rem 2rem;
+    transition: right 0.35s ease;
+    z-index: 99;
+  }
+  nav ul.open { right: 0; }
+  nav ul li { width: 100%; }
+  nav ul a {
+    display: block;
+    padding: 1rem 0;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    width: 100%;
+  }
+  nav ul .nav-cta {
+    margin-top: 1.5rem;
+    display: inline-block;
+    width: auto;
+  }
+}
+
+/* ---------------- HERO ---------------- */
+.hero{
+  padding:24px 0 0;
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(91,45,142,.35), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 10%, rgba(46,134,222,.14), transparent 55%),
+    var(--void);
+}
+.hero-grid{
+  display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center;
+  padding-bottom:64px;
+}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:var(--font-mono); font-size:11px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--purple-bright); margin-bottom:22px;
+}
+.eyebrow::before{content:''; width:22px; height:2px; background:var(--purple-bright); display:inline-block;}
+h1.hero-title{
+  font-family:var(--font-display); font-size:clamp(38px,5.2vw,64px); line-height:1.04;
+  letter-spacing:-.5px; color:var(--ink); text-transform:uppercase;
+}
+h1.hero-title em{
+  font-style:normal; color:var(--purple-bright);
+  background:linear-gradient(180deg, transparent 62%, rgba(139,92,199,.28) 62%);
+}
+.hero-sub{
+  font-size:16.5px; color:var(--muted); max-width:480px; margin:22px 0 32px; line-height:1.7;
+}
+.hero-ctas{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:18px;}
+.btn{
+  display:inline-flex; align-items:center; gap:9px;
+  font-size:14px; font-weight:700; padding:14px 26px; border-radius:10px;
+  transition:transform .12s, filter .15s, background .15s;
+}
+.btn-primary{background:var(--purple); color:#fff;}
+.btn-primary:hover{filter:brightness(1.12); transform:translateY(-1px);}
+.btn-ghost{background:transparent; color:var(--ink); border:1px solid var(--line);}
+.btn-ghost:hover{border-color:var(--purple-bright); color:var(--purple-bright);}
+.hero-fine{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.5px; color:var(--faint);}
+.hero-fine b{color:var(--muted);}
+
+/* mockup do app na hero */
+.mock-wrap{position:relative; perspective:1400px;}
+.mock{
+  background:var(--sf-dark); border-radius:14px; border:1px solid #241C38;
+  box-shadow:0 40px 90px -30px rgba(46,134,222,.35), 0 20px 60px -20px rgba(0,0,0,.6);
+  transform:rotateY(-8deg) rotateX(4deg) rotate(1deg);
+  overflow:hidden;
+}
+.mock-bar{display:flex; align-items:center; gap:6px; padding:11px 14px; background:#100C1C; border-bottom:1px solid #221A34;}
+.mock-dot{width:8px; height:8px; border-radius:50%; background:#3A3050;}
+.mock-title{margin-left:8px; font-family:var(--font-mono); font-size:10px; color:#6B627E; letter-spacing:.5px;}
+.mock-body{display:flex;}
+.mock-side{width:88px; background:#0E0A18; border-right:1px solid #201830; padding:14px 10px; flex-shrink:0;}
+.mock-side-item{height:8px; border-radius:3px; background:#241C34; margin-bottom:10px;}
+.mock-side-item.active{background:var(--sf-blue);}
+.mock-main{flex:1; padding:16px 18px 20px;}
+.mock-h{font-family:var(--font-display); font-size:13px; color:#EDEAF4; text-transform:uppercase; margin-bottom:12px;}
+.mock-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px;}
+.mock-stat{background:#141026; border:1px solid #221A34; border-radius:8px; padding:9px 10px;}
+.mock-stat b{display:block; font-family:var(--font-mono); color:var(--sf-blue); font-size:16px;}
+.mock-stat span{font-size:8.5px; color:#79708F;}
+.mock-cols{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+.mock-col{background:#141026; border:1px solid #221A34; border-radius:8px; padding:8px;}
+.mock-col-h{font-family:var(--font-mono); font-size:7.5px; color:#6B627E; text-transform:uppercase; margin-bottom:6px;}
+.mock-card{background:#1C1630; border:1px solid #2A2140; border-radius:6px; padding:7px 8px; margin-bottom:6px;}
+.mock-card b{display:block; font-size:9px; color:#E4E0F0;}
+.mock-card span{font-size:7.5px; color:#78708F;}
+.mock-badge{
+  position:absolute; top:-16px; right:18px; background:var(--purple); color:#fff;
+  font-family:var(--font-mono); font-size:10px; font-weight:700; letter-spacing:.5px;
+  padding:8px 14px; border-radius:999px; box-shadow:0 12px 24px -8px rgba(91,45,142,.6);
+  transform:rotate(4deg);
+}
+
+/* faixa rolante */
+.marquee{
+  background:var(--purple); overflow:hidden; padding:13px 0;
+  border-top:1px solid rgba(255,255,255,.12); border-bottom:1px solid rgba(255,255,255,.12);
+}
+.marquee-track{display:flex; gap:44px; white-space:nowrap; animation:scroll 32s linear infinite; width:max-content;}
+.marquee-track span{
+  font-family:var(--font-mono); font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase;
+  color:#fff; opacity:.92;
+}
+@keyframes scroll{from{transform:translateX(0);} to{transform:translateX(-50%);}}
+@media(prefers-reduced-motion:reduce){.marquee-track{animation:none;}}
+
+/* ---------------- SEÇÕES CLARAS ---------------- */
+.section-light{background:var(--paper); color:#1C1424;}
+.section-light .eyebrow{color:var(--purple);}
+.section-light .eyebrow::before{background:var(--purple);}
+.pad{padding:88px 0;}
+.pad-sm{padding:64px 0;}
+h2.h2{
+  font-family:var(--font-display); font-size:clamp(28px,3.6vw,42px); text-transform:uppercase;
+  line-height:1.08; letter-spacing:-.3px; max-width:640px;
+}
+.section-light h2.h2{color:#1C1424;}
+.section-dark h2.h2{color:var(--ink);}
+.section-lede{font-size:15.5px; color:var(--muted-on-paper); max-width:520px; margin-top:14px; line-height:1.7;}
+.section-dark .section-lede{color:var(--muted);}
+
+/* problema */
+.pain-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:48px;}
+.pain-card{
+  background:var(--paper-tint); border:1px solid #ECE6F2; border-radius:14px; padding:28px 24px;
+}
+.pain-num{font-family:var(--font-mono); font-size:11px; color:var(--purple); letter-spacing:1px; margin-bottom:14px;}
+.pain-card h3{font-family:var(--font-display); font-size:16px; text-transform:none; line-height:1.3; margin-bottom:10px; letter-spacing:0;}
+.pain-card p{font-size:13.5px; color:var(--muted-on-paper); line-height:1.65;}
+
+/* como funciona */
+.section-dark{background:var(--void-2);}
+.steps{margin-top:52px; display:grid; grid-template-columns:repeat(4,1fr); gap:0; position:relative;}
+.step{padding:0 20px 0 0; position:relative;}
+.step:not(:last-child)::after{
+  content:''; position:absolute; top:19px; right:0; width:100%; height:1px;
+  background:linear-gradient(90deg, var(--line), transparent);
+}
+.step-num{
+  font-family:var(--font-mono); font-size:13px; color:var(--void); background:var(--purple-bright);
+  width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:700; margin-bottom:18px; position:relative; z-index:2;
+}
+.step h4{font-size:14.5px; font-weight:700; color:var(--ink); margin-bottom:8px;}
+.step p{font-size:13px; color:var(--muted); line-height:1.6;}
+@media(max-width:880px){
+  .steps{grid-template-columns:1fr 1fr; row-gap:36px;}
+  .step:nth-child(2)::after{display:none;}
+}
+
+/* grade de módulos */
+.mod-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:48px;}
+.mod-card{
+  background:var(--paper-tint); border:1px solid #ECE6F2; border-radius:12px; padding:22px 20px;
+  transition:border-color .15s, transform .15s;
+}
+.mod-card:hover{border-color:var(--purple); transform:translateY(-2px);}
+.mod-icon{
+  width:34px; height:34px; border-radius:9px; background:var(--purple-soft); color:var(--purple);
+  display:flex; align-items:center; justify-content:center; margin-bottom:14px; font-size:16px;
+}
+.mod-card h4{font-size:14px; font-weight:700; margin-bottom:7px; letter-spacing:0;}
+.mod-card p{font-size:12.5px; color:var(--muted-on-paper); line-height:1.6;}
+@media(max-width:980px){.mod-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.mod-grid{grid-template-columns:1fr;}}
+
+/* destaque do lembrete */
+.spotlight{
+  margin-top:60px; background:linear-gradient(135deg, #17102A, #0F0A1C);
+  border:1px solid #2A2040; border-radius:20px; padding:48px; display:grid;
+  grid-template-columns:1fr 1fr; gap:40px; align-items:center;
+}
+.spotlight-tag{font-family:var(--font-mono); font-size:10.5px; color:var(--sf-blue); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:14px;}
+.spotlight h3{font-family:var(--font-display); font-size:24px; color:var(--ink); text-transform:uppercase; line-height:1.15; margin-bottom:14px;}
+.spotlight p{font-size:14.5px; color:var(--muted); line-height:1.75;}
+.reminder-mock{background:#0E0A18; border:1px solid #241C38; border-radius:14px; padding:22px; box-shadow:0 30px 70px -25px rgba(0,0,0,.7);}
+.reminder-h{font-family:var(--font-display); font-size:15px; color:var(--ink); text-transform:uppercase; margin-bottom:4px;}
+.reminder-sub{font-size:11px; color:#7A7190; margin-bottom:16px;}
+.reminder-row{background:#161228; border:1px solid #241C38; border-radius:8px; padding:10px 12px; margin-bottom:8px;}
+.reminder-row b{display:block; font-size:11.5px; color:#E8E4F2;}
+.reminder-row span{font-size:10px; color:#7A7190;}
+.reminder-row.warn{border-left:3px solid #C2766A;}
+.reminder-row.info{border-left:3px solid var(--sf-blue);}
+.reminder-row.ok{border-left:3px solid var(--sage);}
+@media(max-width:880px){.spotlight{grid-template-columns:1fr; padding:32px;}}
+
+/* stat strip */
+.stat-strip{display:flex; justify-content:center; gap:70px; padding:36px 0 0; flex-wrap:wrap; text-align:center;}
+.stat-strip .stat{min-width:140px;}
+.stat-strip .stat b{display:block; font-family:var(--font-display); font-size:34px; color:var(--purple); white-space:nowrap;}
+.stat-strip .stat span{font-family:var(--font-mono); font-size:11px; color:var(--muted-on-paper); letter-spacing:.5px; text-transform:uppercase; white-space:nowrap;}
+
+/* FAQ */
+.faq{max-width:760px; margin:48px auto 0;}
+.faq-item{border-bottom:1px solid #ECE6F2; padding:20px 0;}
+.faq-q{
+  display:flex; justify-content:space-between; align-items:center; gap:20px; cursor:pointer;
+  font-size:15px; font-weight:700; color:#1C1424;
+}
+.faq-q .plus{font-family:var(--font-mono); font-size:18px; color:var(--purple); transition:transform .2s; flex-shrink:0;}
+.faq-item.open .plus{transform:rotate(45deg);}
+.faq-a{max-height:0; overflow:hidden; transition:max-height .25s ease;}
+.faq-item.open .faq-a{max-height:240px;}
+.faq-a p{font-size:13.5px; color:var(--muted-on-paper); line-height:1.7; padding-top:12px; max-width:600px;}
+
+/* CTA final */
+.cta-final{
+  background:radial-gradient(ellipse 800px 400px at 50% 0%, rgba(91,45,142,.4), transparent 60%), var(--void);
+  text-align:center; padding:96px 0;
+}
+.cta-final .eyebrow{justify-content:center;}
+.cta-final h2{font-family:var(--font-display); font-size:clamp(28px,4vw,44px); text-transform:uppercase; margin-bottom:16px;}
+.cta-final p{color:var(--muted); font-size:15px; max-width:480px; margin:0 auto 34px;}
+
+/* footer */
+footer{background:var(--void-2); border-top:1px solid var(--line-soft); padding:44px 0 30px;}
+.foot-row{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;}
+.foot-brand{font-family:var(--font-display); font-size:14px; color:var(--ink);}
+.foot-brand span{color:var(--purple-bright);}
+.foot-sub{font-size:11.5px; color:var(--faint); margin-top:6px;}
+.foot-links{display:flex; gap:22px; font-size:12.5px; color:var(--muted);}
+.foot-links a:hover{color:var(--purple-bright);}
+.foot-legal{margin-top:28px; padding-top:20px; border-top:1px solid var(--line-soft); font-size:11px; color:var(--faint); text-align:center;}
+
+/* reveal */
+.reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
+.reveal.in{opacity:1; transform:translateY(0);}
+
+@media(max-width:980px){
+  .hero-grid{grid-template-columns:1fr; gap:48px;}
+  .mock-wrap{max-width:420px;}
+  .pain-grid{grid-template-columns:1fr;}
+  .steps{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:640px){
+  .spotlight{padding:26px;}
+  .stat-strip{gap:40px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" style="display:block;height:100px;">
+    <video autoplay loop muted playsinline style="height:100px;width:auto;display:block;mix-blend-mode:screen;" src="assets/logo-anim.mp4"></video>
+  </a>
+  <ul id="navMenu">
+    <li><a href="index.html#servicos">Serviços</a></li>
+    <li><a href="index.html#social">Social Media</a></li>
+    <li><a href="index.html#sobre">Sobre</a></li>
+    <li><a href="index.html#faq">FAQ</a></li>
+    <li><a href="login.html">Área do Cliente</a></li>
+    <li><a href="studioflow.html" class="current">StudioFlow</a></li>
+    <li><a href="index.html#contato" class="nav-cta">Contato</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<a href="https://wa.me/5524992938680?text=Ol%C3%A1%2C%20vi%20a%20p%C3%A1gina%20do%20StudioFlow%20e%20quero%20saber%20mais%20sobre%20o%20programa!" class="floating-whatsapp" id="floatingWhatsapp" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <span class="fw-label">Falar no WhatsApp</span>
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.35 5.07L2 22l5.1-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.6 0-3.1-.44-4.38-1.2l-.31-.19-3.02.79.8-2.95-.2-.3A7.94 7.94 0 0 1 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8zm4.4-5.9c-.24-.12-1.43-.7-1.65-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.92-1.18-.71-.63-1.19-1.42-1.33-1.66-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.46-.39-.4-.54-.4-.14 0-.3-.02-.46-.02s-.42.06-.64.3c-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.64.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.43-.58 1.63-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z"/></svg>
+</a>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Software para fotógrafos e criativos</div>
+      <h1 class="hero-title">Seu estúdio<br>inteiro, <em>numa<br>tela só.</em></h1>
+      <p class="hero-sub">Do primeiro contato do cliente até o arquivo entregue: orçamento, contrato, agenda, entregas e financeiro — organizados num só programa, sem depender de planilha, bloco de notas e memória.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="https://wa.me/5524992938680?text=Ol%C3%A1%2C%20vi%20a%20p%C3%A1gina%20do%20StudioFlow%20e%20quero%20saber%20mais%20sobre%20o%20programa!">Falar no WhatsApp</a>
+        <a class="btn btn-ghost" href="#como-funciona">Ver como funciona ↓</a>
+      </div>
+      <div class="hero-fine"><b>Pagamento único</b> · sem mensalidade · funciona 100% offline</div>
+    </div>
+
+    <div class="mock-wrap">
+      <div class="mock-badge">criado por um fotógrafo</div>
+      <div class="mock">
+        <div class="mock-bar"><div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-title">STUDIOFLOW — DASHBOARD</div></div>
+        <div class="mock-body">
+          <div class="mock-side">
+            <div class="mock-side-item active"></div>
+            <div class="mock-side-item"></div>
+            <div class="mock-side-item"></div>
+            <div class="mock-side-item"></div>
+            <div class="mock-side-item"></div>
+            <div class="mock-side-item"></div>
+          </div>
+          <div class="mock-main">
+            <div class="mock-h">Dashboard</div>
+            <div class="mock-stats">
+              <div class="mock-stat"><b>2</b><span>eventos essa semana</span></div>
+              <div class="mock-stat"><b>1</b><span>entrega pendente</span></div>
+              <div class="mock-stat"><b>18</b><span>clientes</span></div>
+            </div>
+            <div class="mock-cols">
+              <div class="mock-col">
+                <div class="mock-col-h">Contrato</div>
+                <div class="mock-card"><b>Ensaio externo</b><span>15/09</span></div>
+              </div>
+              <div class="mock-col">
+                <div class="mock-col-h">Evento</div>
+                <div class="mock-card"><b>Casamento</b><span>22/09</span></div>
+                <div class="mock-card"><b>Aniversário</b><span>27/09</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>Pipeline</span><span>·</span><span>Orçamentos em PDF</span><span>·</span><span>Agenda</span><span>·</span>
+      <span>Entregas automáticas</span><span>·</span><span>Financeiro</span><span>·</span><span>Conteúdo pras redes</span><span>·</span>
+      <span>Freelancer</span><span>·</span><span>Tarefas</span><span>·</span><span>Busca rápida</span><span>·</span>
+      <span>Pipeline</span><span>·</span><span>Orçamentos em PDF</span><span>·</span><span>Agenda</span><span>·</span>
+      <span>Entregas automáticas</span><span>·</span><span>Financeiro</span><span>·</span><span>Conteúdo pras redes</span><span>·</span>
+      <span>Freelancer</span><span>·</span><span>Tarefas</span><span>·</span><span>Busca rápida</span><span>·</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROBLEMA ================= -->
+<section class="section-light pad">
+  <div class="wrap reveal">
+    <div class="eyebrow">O problema</div>
+    <h2 class="h2">Você não abriu um estúdio pra virar administrador.</h2>
+    <p class="section-lede">Mas é isso que acontece quando cliente, orçamento e prazo vivem espalhados entre WhatsApp, papel e memória.</p>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-num">01</div>
+        <h3>Cliente some no meio do orçamento</h3>
+        <p>Perdido entre conversas de WhatsApp, sem um jeito rápido de ver quem já fechou, quem ainda tá pensando e quem sumiu.</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">02</div>
+        <h3>O evento passou e ninguém marcou a entrega</h3>
+        <p>Só quando o cliente cobra é que você lembra que ainda não editou — e aí vira correria.</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-num">03</div>
+        <h3>Fim do mês chega sem noção do caixa</h3>
+        <p>Receita, despesa e freela espalhados, sem saber de verdade quanto sobrou pra você.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COMO FUNCIONA ================= -->
+<section class="section-dark pad" id="como-funciona">
+  <div class="wrap reveal">
+    <div class="eyebrow">Como funciona</div>
+    <h2 class="h2">De comprar a usar, em 4 passos.</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h4>Você adquire o StudioFlow</h4>
+        <p>Pagamento único, sem mensalidade — combinado direto comigo, por Pix ou cartão.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h4>Recebe sua chave de ativação</h4>
+        <p>Gerada especificamente pro seu computador — funciona só nele, pra sempre.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h4>Ativa no primeiro acesso</h4>
+        <p>Cola a chave uma única vez. Depois disso, o programa nunca mais pede.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h4>Configura os seus dados</h4>
+        <p>Nome do estúdio, Instagram e telefone — pra cada orçamento sair com a sua cara, não a do programa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MÓDULOS ================= -->
+<section class="section-light pad">
+  <div class="wrap reveal">
+    <div class="eyebrow">O que tem dentro</div>
+    <h2 class="h2">Um programa só, cada etapa do seu trabalho.</h2>
+    <p class="section-lede">Nada de abrir cinco apps diferentes pra dar conta do estúdio. Tudo conversa entre si, dentro do mesmo lugar.</p>
+
+    <div class="mod-grid">
+      <div class="mod-card">
+        <div class="mod-icon">◧</div>
+        <h4>Pipeline</h4>
+        <p>Veja de cara o que está em contrato e o que já foi confirmado, separado por mês.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">▤</div>
+        <h4>Orçamentos em PDF</h4>
+        <p>Monte pacotes com fotos, vídeo e itens inclusos — o PDF sai pronto, com à vista e parcelado calculados sozinhos.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">☆</div>
+        <h4>Modelos de pacote</h4>
+        <p>Salve os pacotes que mais vende e reaproveite num clique, sem digitar tudo de novo.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">▦</div>
+        <h4>Agenda</h4>
+        <p>Todo evento confirmado, numa lista só — sem precisar confiar na memória.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">✓</div>
+        <h4>Entregas automáticas</h4>
+        <p>Assim que a data do evento passa, o trabalho cai sozinho numa lista de pendências. Você só marca quando entregar.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">$</div>
+        <h4>Financeiro</h4>
+        <p>Entradas, saídas e ticket médio, filtrando por mês — sem abrir planilha nenhuma.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">✎</div>
+        <h4>Conteúdo pras redes</h4>
+        <p>Sugestões de Reels, Stories, carrossel e legenda pra cada trabalho — ou um calendário de 30 dias inteiro, pronto.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">◐</div>
+        <h4>Freelancer</h4>
+        <p>Controle quem trabalha com você por diária, com data de pagamento e histórico.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">▪</div>
+        <h4>Anotações</h4>
+        <p>Um bloco de notas dentro do programa — pagamento pendente, lembrete solto, qualquer coisa.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">◷</div>
+        <h4>Tarefas</h4>
+        <p>Descrição e prazo — o programa te lembra sozinho do que está vencendo.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">⌕</div>
+        <h4>Busca rápida</h4>
+        <p>Ctrl+K de qualquer tela: acha cliente, trabalho, nota ou tarefa na hora.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">⚙</div>
+        <h4>Configurações do estúdio</h4>
+        <p>Seu nome, Instagram e telefone aparecem automaticamente em todo orçamento gerado.</p>
+      </div>
+    </div>
+
+    <!-- destaque do lembrete semanal -->
+    <div class="spotlight">
+      <div>
+        <div class="spotlight-tag">// o programa vem até você</div>
+        <h3>O aviso que você não vai esquecer de ver</h3>
+        <p>Toda vez que você abre o StudioFlow, ele já te mostra na hora: quantos eventos tem essa semana, quais entregas ainda estão pendentes, e quais freelancers estão esperando pagamento. Sem precisar ir atrás de nada — se tiver algo pra você olhar, o programa te avisa sozinho, assim que abre.</p>
+      </div>
+      <div class="reminder-mock">
+        <div class="reminder-h">Essa semana</div>
+        <div class="reminder-sub">Resumo do que está vencendo ou chegando perto.</div>
+        <div class="reminder-row warn"><b>Entregar fotos do Breno</b><span>atrasada · 22/08</span></div>
+        <div class="reminder-row info"><b>Casamento — Vitória</b><span>evento · 12/09</span></div>
+        <div class="reminder-row ok"><b>Freela Rick</b><span>1 trabalho em aberto · R$ 500</span></div>
+      </div>
+    </div>
+
+    <div class="stat-strip">
+      <div class="stat"><b>12</b><span>módulos integrados</span></div>
+      <div class="stat"><b>100%</b><span>funciona offline</span></div>
+      <div class="stat"><b>1</b><span>pagamento, sem mensalidade</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="section-light pad" id="faq-studioflow">
+  <div class="wrap reveal">
+    <div class="eyebrow">Perguntas frequentes</div>
+    <h2 class="h2">Ainda com dúvidas sobre o StudioFlow?</h2>
+
+    <div class="faq">
+      <div class="faq-item open">
+        <div class="faq-q"><span>Preciso pagar mensalidade?</span><span class="plus">+</span></div>
+        <div class="faq-a"><p>Não. É pagamento único — você paga uma vez, recebe sua chave de ativação, e usa o programa enquanto quiser, sem mensalidade nenhuma.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>Como funciona a ativação por chave?</span><span class="plus">+</span></div>
+        <div class="faq-a"><p>Depois da compra, o programa te mostra um código único, gerado a partir do seu computador. Você me manda esse código, eu gero sua chave de ativação e te envio de volta. Você cola no programa e ele libera — permanentemente, só naquele computador.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>Funciona em qualquer computador?</span><span class="plus">+</span></div>
+        <div class="faq-a"><p>Funciona em qualquer computador com Windows. A chave é vinculada ao computador em que foi ativada — se um dia trocar de máquina, é só me chamar que gero uma chave nova pra você.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>Preciso de internet pra usar?</span><span class="plus">+</span></div>
+        <div class="faq-a"><p>Não. Depois de ativado, o StudioFlow funciona 100% offline — seus dados ficam salvos no seu próprio computador, não em nenhum servidor.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>Meus dados ficam seguros?</span><span class="plus">+</span></div>
+        <div class="faq-a"><p>Sim — como tudo roda localmente no seu computador, não existe um servidor externo guardando as informações dos seus clientes. O programa também tem uma opção pronta de backup, pra você guardar uma cópia sempre que quiser.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>Dá pra personalizar com o nome do meu estúdio?</span><span class="plus">+</span></div>
+        <div class="faq-a"><p>Sim! Logo no primeiro uso, depois de ativar, você configura o nome do seu estúdio, Instagram e telefone — esses dados aparecem automaticamente em todo orçamento em PDF que você gerar.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CTA FINAL ================= -->
+<section class="cta-final">
+  <div class="wrap reveal">
+    <div class="eyebrow">Vamos conversar</div>
+    <h2>Curioso pra ver funcionando?</h2>
+    <p>Te mostro a tela real, tiro suas dúvidas e explico certinho como funciona a ativação — é só chamar no WhatsApp.</p>
+    <a class="btn btn-primary" href="https://wa.me/5524992938680?text=Ol%C3%A1%2C%20vi%20a%20p%C3%A1gina%20do%20StudioFlow%20e%20quero%20saber%20mais%20sobre%20o%20programa!">Falar no WhatsApp →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <div>
+        <div class="foot-brand">Studio<span>Flow</span></div>
+        <div class="foot-sub">um produto desenvolvido por LucasM. Fotografia &amp; Audiovisual</div>
+      </div>
+      <div class="foot-links">
+        <a href="https://wa.me/5524992938680">WhatsApp</a>
+        <a href="mailto:fotografia.lucasm@gmail.com">E-mail</a>
+        <a href="https://www.instagram.com/lucasm.fotografias/">Instagram</a>
+        <a href="index.html">Voltar ao site</a>
+      </div>
+    </div>
+    <div class="foot-legal">© 2026 · StudioFlow · um produto LucasM. Fotografia &amp; Audiovisual</div>
+  </div>
+</footer>
+
+<script>
+// Menu mobile (idêntico ao index.html)
+const navToggle = document.getElementById('navToggle');
+const navMenu = document.getElementById('navMenu');
+const navOverlay = document.getElementById('navOverlay');
+function closeNav() {
+  navToggle.classList.remove('open');
+  navMenu.classList.remove('open');
+  navOverlay.classList.remove('open');
+  navToggle.setAttribute('aria-expanded', 'false');
+}
+navToggle.addEventListener('click', () => {
+  const isOpen = navMenu.classList.toggle('open');
+  navToggle.classList.toggle('open', isOpen);
+  navOverlay.classList.toggle('open', isOpen);
+  navToggle.setAttribute('aria-expanded', String(isOpen));
+});
+navOverlay.addEventListener('click', closeNav);
+navMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNav));
+
+// Botão flutuante de WhatsApp: some no topo, aparece ao rolar
+const floatingWA = document.getElementById('floatingWhatsapp');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 500) floatingWA.classList.add('visible');
+  else floatingWA.classList.remove('visible');
+});
+
+// FAQ accordion
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.querySelector('.faq-q').addEventListener('click', () => {
+    const wasOpen = item.classList.contains('open');
+    item.parentElement.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  });
+});
+
+// scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
